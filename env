@@ -1,0 +1,7 @@
+PORT=5000
+MONGODB_URI=mongodb+srv://<db_user>:<db_password>@cluster0.uahk9ix.mongodb.net/mern_smtp?retryWrites=true&w=majority
+GMAIL_USER=gmail_address
+GMAIL_APP_PASSWORD=password
+NODE_ENV=development
+CLIENT_URL=http://localhost:3000
+
