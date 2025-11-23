@@ -129,10 +129,27 @@ class EmailService {
         to: emailData.to,
         subject: emailData.subject,
         text: emailData.message,
-        html: this.formatPlainTextToHTML(emailData.message, emailData.html)
+        html: this.formatPlainTextToHTML(emailData.message, emailData.html),
+        attachments: (emailData.attachments && emailData.attachments.length > 0)
+          ? emailData.attachments.map(file => ({
+            filename: file.originalname,
+            path: file.path
+          }))
+          : []
       };
 
+      // Update email record with attachments info if present
+      if (emailData.attachments && emailData.attachments.length > 0) {
+        emailRecord.attachments = emailData.attachments.map(file => ({
+          filename: file.originalname,
+          path: file.path,
+          size: file.size
+        }));
+        await emailRecord.save();
+      }
+
       console.log('Attempting to send email to:', emailData.to);
+      console.log('Attachments count:', emailData.attachments ? emailData.attachments.length : 0);
 
       // Send email
       const result = await this.transporter.sendMail(mailOptions);

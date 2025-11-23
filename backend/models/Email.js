@@ -24,6 +24,11 @@ const emailSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  attachments: [{
+    filename: String,
+    path: String,
+    size: Number
+  }],
   status: {
     type: String,
     enum: ['sent', 'failed', 'pending'],
@@ -55,12 +60,12 @@ emailSchema.index({ to: 1 });
 emailSchema.index({ status: 1 });
 
 // Virtual for email age
-emailSchema.virtual('age').get(function() {
+emailSchema.virtual('age').get(function () {
   return Date.now() - this.createdAt;
 });
 
 // Method to mark as sent
-emailSchema.methods.markAsSent = function(messageId) {
+emailSchema.methods.markAsSent = function (messageId) {
   this.status = 'sent';
   this.messageId = messageId;
   this.sentAt = new Date();
@@ -69,7 +74,7 @@ emailSchema.methods.markAsSent = function(messageId) {
 };
 
 // Method to mark as failed
-emailSchema.methods.markAsFailed = function(error) {
+emailSchema.methods.markAsFailed = function (error) {
   this.status = 'failed';
   this.error = error;
   this.attempts += 1;

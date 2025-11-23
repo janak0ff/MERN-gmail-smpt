@@ -20,7 +20,8 @@ function App() {
     to: '',
     subject: '',
     message: '',
-    html: ''
+    html: '',
+    attachments: []
   });
   const [loading, setLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -54,6 +55,23 @@ function App() {
     });
   };
 
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setFormData({
+      ...formData,
+      attachments: [...formData.attachments, ...files]
+    });
+  };
+
+  const removeAttachment = (index) => {
+    const newAttachments = [...formData.attachments];
+    newAttachments.splice(index, 1);
+    setFormData({
+      ...formData,
+      attachments: newAttachments
+    });
+  };
+
   const handleFilterChange = (e) => {
     setFilters({
       ...filters,
@@ -67,11 +85,25 @@ function App() {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/email/send`, formData);
+      const data = new FormData();
+      data.append('to', formData.to);
+      data.append('subject', formData.subject);
+      data.append('message', formData.message);
+      data.append('html', formData.html);
+
+      formData.attachments.forEach(file => {
+        data.append('attachments', file);
+      });
+
+      const response = await axios.post(`${API_BASE_URL}/email/send`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
       if (response.data.success) {
         toast.success('Email sent successfully!');
-        setFormData({ to: '', subject: '', message: '', html: '' });
+        setFormData({ to: '', subject: '', message: '', html: '', attachments: [] });
 
         // Refresh stats if we're on history tab
         if (activeTab === 'history') {
@@ -178,6 +210,8 @@ function App() {
           <ComposeEmail
             formData={formData}
             handleChange={handleChange}
+            handleFileChange={handleFileChange}
+            removeAttachment={removeAttachment}
             handleSubmit={handleSubmit}
             loading={loading}
           />

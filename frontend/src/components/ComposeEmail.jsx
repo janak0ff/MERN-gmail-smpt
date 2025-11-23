@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Send, User, Type, FileCode, PenTool } from 'lucide-react';
+import { Send, User, Type, FileCode, PenTool, Paperclip, X } from 'lucide-react';
 
-const ComposeEmail = ({ formData, handleChange, handleSubmit, loading }) => {
+const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFileChange, removeAttachment }) => {
     const [showHtml, setShowHtml] = useState(false);
 
     return (
@@ -56,6 +56,24 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading }) => {
                         />
                     </div>
 
+                    {formData.attachments && formData.attachments.length > 0 && (
+                        <div className="attachments-list">
+                            {formData.attachments.map((file, index) => (
+                                <div key={index} className="attachment-item">
+                                    <span className="attachment-name">{file.name}</span>
+                                    <span className="attachment-size">({(file.size / 1024).toFixed(1)} KB)</span>
+                                    <button
+                                        type="button"
+                                        className="remove-attachment"
+                                        onClick={() => removeAttachment(index)}
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     <div className="html-toggle-section">
                         <button
                             type="button"
@@ -87,6 +105,18 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading }) => {
                             >
                                 <PenTool size={18} />
                             </button>
+                            <div className="file-input-wrapper">
+                                <input
+                                    type="file"
+                                    id="file-upload"
+                                    multiple
+                                    onChange={handleFileChange}
+                                    className="hidden-file-input"
+                                />
+                                <label htmlFor="file-upload" className="tool-btn" title="Attach Files">
+                                    <Paperclip size={18} />
+                                </label>
+                            </div>
                         </div>
 
                         <button

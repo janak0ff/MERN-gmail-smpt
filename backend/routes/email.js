@@ -3,6 +3,31 @@ const router = express.Router();
 const Email = require('../models/Email');
 const emailService = require('../services/emailService');
 const rateLimit = require('express-rate-limit');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure Multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = 'uploads/';
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Create unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
 
 // Rate limiting for email sending
 const sendEmailLimiter = rateLimit({
@@ -15,8 +40,12 @@ const sendEmailLimiter = rateLimit({
 });
 
 // Send email
-router.post('/send', sendEmailLimiter, async (req, res) => {
+router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, res) => {
   try {
+    console.log('=== Send Email Request ===');
+    console.log('Body:', req.body);
+    console.log('Files:', req.files);
+
     const { to, subject, message, html } = req.body;
 
     // Validation
@@ -51,7 +80,8 @@ router.post('/send', sendEmailLimiter, async (req, res) => {
       to,
       subject,
       message,
-      html
+      html,
+      attachments: req.files // Pass uploaded files
     });
 
     if (emailResult.success) {
@@ -72,9 +102,11 @@ router.post('/send', sendEmailLimiter, async (req, res) => {
 
   } catch (error) {
     console.error('Send email error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
+      error: error.message
     });
   }
 });
