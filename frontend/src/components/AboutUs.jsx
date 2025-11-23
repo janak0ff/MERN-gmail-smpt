@@ -49,19 +49,16 @@ const AboutUs = () => {
                 </div>
             </div>
 
-            <div className="social-section">
-                <h3>Connect With Us</h3>
-                <div className="social-links">
-                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="social-link github">
-                        <Github size={24} />
-                    </a>
-                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-link linkedin">
-                        <Linkedin size={24} />
-                    </a>
-                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-link twitter">
-                        <Twitter size={24} />
-                    </a>
-                </div>
+            <div className="social-links">
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="social-link github">
+                    <Github size={24} />
+                </a>
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-link linkedin">
+                    <Linkedin size={24} />
+                </a>
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-link twitter">
+                    <Twitter size={24} />
+                </a>
             </div>
 
             <div className="about-footer">

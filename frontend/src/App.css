@@ -1083,14 +1083,40 @@ textarea.form-control {
   color: var(--text-secondary);
 }
 
-.social-section {
-  text-align: center;
-  margin-bottom: 2rem;
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 3rem 0;
 }
 
-.social-section h3 {
-  margin-bottom: 1.5rem;
-  color: var(--text-main);
+.social-link {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  background-color: var(--bg-main);
+  transition: var(--transition);
+}
+
+.social-link:hover {
+  transform: translateY(-3px);
+  color: white;
+}
+
+.social-link.github:hover {
+  background-color: #333;
+}
+
+.social-link.linkedin:hover {
+  background-color: #0077b5;
+}
+
+.social-link.twitter:hover {
+  background-color: #1da1f2;
 }
 
 .about-footer {
@@ -1127,4 +1153,9 @@ textarea.form-control {
   border-top: 1px solid var(--border-color);
   flex-shrink: 0;
   /* Don't shrink */
+  position: relative;
+  z-index: 20;
+  background-color: var(--bg-card);
 }
+
+```

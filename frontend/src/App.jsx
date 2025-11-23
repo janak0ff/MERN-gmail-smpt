@@ -186,7 +186,7 @@ function App() {
             handleFilterChange={handleFilterChange}
             clearFilters={clearFilters}
             pagination={pagination}
-            onPageChange={handlePageChange}
+            handlePageChange={handlePageChange}
             onRefresh={fetchEmailHistory}
             getStatusIcon={getStatusIcon}
           />
