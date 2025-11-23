@@ -949,7 +949,7 @@ body {
 
 .compose-paper {
   background: var(--bg-card);
-  border-radius: var(--border-radius-lg);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   border: 1px solid var(--border-color);
@@ -967,6 +967,30 @@ body {
 .compose-header h2 {
   font-size: 1.25rem;
   font-weight: 600;
+  color: var(--text-main);
+}
+
+.window-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.control-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.control-dot.close {
+  background: #ff5f57;
+}
+
+.control-dot.minimize {
+  background: #febc2e;
+}
+
+.control-dot.expand {
+  background: #28c840;
 }
 
 .compose-form {
@@ -979,12 +1003,18 @@ body {
   border-bottom: 1px solid var(--border-color);
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
+  transition: border-color 0.3s;
+}
+
+.input-group:focus-within {
+  border-color: var(--primary);
 }
 
 .input-group label {
   width: 80px;
   color: var(--text-secondary);
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .clean-input {
@@ -995,6 +1025,10 @@ body {
   font-size: 1rem;
   color: var(--text-main);
   outline: none;
+}
+
+.subject-input {
+  font-weight: 600;
 }
 
 .editor-area {
@@ -1008,7 +1042,7 @@ body {
   border: none;
   background: transparent;
   resize: none;
-  font-size: 1rem;
+  font-size: 1.05rem;
   line-height: 1.6;
   color: var(--text-main);
   outline: none;
@@ -1021,11 +1055,24 @@ body {
   padding-top: 1rem;
 }
 
-.html-toggle-section summary {
-  cursor: pointer;
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
   color: var(--text-secondary);
+  cursor: pointer;
   font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+
+.toggle-btn:hover,
+.toggle-btn.active {
+  color: var(--primary);
+  background: var(--bg-main);
 }
 
 .code-textarea {
@@ -1033,13 +1080,18 @@ body {
   height: 150px;
   background: var(--bg-main);
   border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--radius-sm);
   padding: 1rem;
   font-family: 'Fira Code', monospace;
   font-size: 0.9rem;
   color: var(--text-main);
   resize: vertical;
   margin-top: 0.5rem;
+  outline: none;
+}
+
+.code-textarea:focus {
+  border-color: var(--primary);
 }
 
 .compose-footer {
@@ -1064,6 +1116,9 @@ body {
   color: var(--text-secondary);
   cursor: pointer;
   transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tool-btn:hover {
@@ -1086,8 +1141,8 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-.btn-send:hover {
-  background-color: var(--primary-dark);
+.btn-send:hover:not(:disabled) {
+  background-color: var(--primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
 }
@@ -1097,7 +1152,6 @@ body {
   cursor: not-allowed;
 }
 
-/* Animations */
 @keyframes float {
   0% {
     transform: translateY(0px);

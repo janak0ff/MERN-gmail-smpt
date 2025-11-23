@@ -1,93 +1,113 @@
-import React from 'react';
-import { Send } from 'lucide-react';
+import React, { useState } from 'react';
+import { Send, User, Type, FileCode, PenTool } from 'lucide-react';
 
 const ComposeEmail = ({ formData, handleChange, handleSubmit, loading }) => {
+    const [showHtml, setShowHtml] = useState(false);
+
     return (
-        <div className="compose-container fade-in">
-            <div className="card compose-card">
-                <div className="card-header">
+        <div className="compose-wrapper fade-in">
+            <div className="compose-paper">
+                <div className="compose-header">
                     <h2>New Message</h2>
+                    <div className="window-controls">
+                        <span className="control-dot close"></span>
+                        <span className="control-dot minimize"></span>
+                        <span className="control-dot expand"></span>
+                    </div>
                 </div>
-                <div className="card-body">
-                    <form onSubmit={handleSubmit} className="email-form">
-                        <div className="form-group">
-                            <label htmlFor="to">To</label>
-                            <input
-                                type="email"
-                                id="to"
-                                name="to"
-                                value={formData.to}
-                                onChange={handleChange}
-                                required
-                                placeholder="recipient@example.com"
-                                className="form-control"
-                            />
-                        </div>
 
-                        <div className="form-group">
-                            <label htmlFor="subject">Subject</label>
-                            <input
-                                type="text"
-                                id="subject"
-                                name="subject"
-                                value={formData.subject}
-                                onChange={handleChange}
-                                required
-                                placeholder="What is this email about?"
-                                className="form-control"
-                            />
-                        </div>
+                <form onSubmit={handleSubmit} className="compose-form">
+                    <div className="input-group">
+                        <label htmlFor="to">To</label>
+                        <input
+                            type="email"
+                            id="to"
+                            name="to"
+                            value={formData.to}
+                            onChange={handleChange}
+                            required
+                            placeholder="recipient@example.com"
+                            className="clean-input"
+                        />
+                    </div>
 
-                        <div className="form-group">
-                            <label htmlFor="message">Message</label>
+                    <div className="input-group">
+                        <label htmlFor="subject">Subject</label>
+                        <input
+                            type="text"
+                            id="subject"
+                            name="subject"
+                            value={formData.subject}
+                            onChange={handleChange}
+                            required
+                            placeholder="What's this about?"
+                            className="clean-input subject-input"
+                        />
+                    </div>
+
+                    <div className="editor-area">
+                        <textarea
+                            name="message"
+                            value={formData.message}
+                            onChange={handleChange}
+                            required
+                            placeholder="Write your story..."
+                            className="clean-textarea"
+                        />
+                    </div>
+
+                    <div className="html-toggle-section">
+                        <button
+                            type="button"
+                            className={`toggle-btn ${showHtml ? 'active' : ''}`}
+                            onClick={() => setShowHtml(!showHtml)}
+                        >
+                            <FileCode size={16} />
+                            <span>{showHtml ? 'Hide HTML Editor' : 'Add HTML Content'}</span>
+                        </button>
+
+                        {showHtml && (
                             <textarea
-                                id="message"
-                                name="message"
-                                value={formData.message}
-                                onChange={handleChange}
-                                required
-                                rows="8"
-                                placeholder="Write your message here..."
-                                className="form-control"
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="html">
-                                HTML Content <span className="optional-badge">Optional</span>
-                            </label>
-                            <textarea
-                                id="html"
                                 name="html"
                                 value={formData.html}
                                 onChange={handleChange}
-                                rows="4"
-                                placeholder="<div>HTML content overrides plain text</div>"
-                                className="form-control code-font"
+                                placeholder="<div>Enter your HTML code here...</div>"
+                                className="code-textarea fade-in"
                             />
-                        </div>
+                        )}
+                    </div>
 
-                        <div className="form-actions">
+                    <div className="compose-footer">
+                        <div className="toolbar">
                             <button
-                                type="submit"
-                                disabled={loading}
-                                className="btn btn-primary send-btn"
+                                type="button"
+                                className={`tool-btn ${showHtml ? 'active' : ''}`}
+                                title="Toggle HTML Editor"
+                                onClick={() => setShowHtml(!showHtml)}
                             >
-                                {loading ? (
-                                    <>
-                                        <div className="spinner-sm"></div>
-                                        <span>Sending...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Send size={18} />
-                                        <span>Send Email</span>
-                                    </>
-                                )}
+                                <PenTool size={18} />
                             </button>
                         </div>
-                    </form>
-                </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="btn-send"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="spinner-sm"></div>
+                                    <span>Sending...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>Send Message</span>
+                                    <Send size={18} />
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );
