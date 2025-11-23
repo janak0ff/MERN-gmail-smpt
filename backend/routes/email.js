@@ -27,14 +27,24 @@ router.post('/send', sendEmailLimiter, async (req, res) => {
       });
     }
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Strict Email validation
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(to)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid email address format'
       });
     }
+
+    // Subject length validation
+    if (subject.length > 200) {
+      return res.status(400).json({
+        success: false,
+        message: 'Subject must be less than 200 characters'
+      });
+    }
+
+
 
     // Send email
     const emailResult = await emailService.sendEmail({
@@ -111,7 +121,7 @@ router.get('/history', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const email = await Email.findById(req.params.id);
-    
+
     if (!email) {
       return res.status(404).json({
         success: false,
@@ -136,7 +146,7 @@ router.get('/:id', async (req, res) => {
 router.get('/stats/summary', async (req, res) => {
   try {
     const stats = await emailService.getEmailStats();
-    
+
     res.status(200).json({
       success: true,
       ...stats
