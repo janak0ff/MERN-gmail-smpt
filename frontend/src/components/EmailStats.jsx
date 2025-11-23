@@ -1,6 +1,5 @@
 import React from 'react';
-import { Mail, BarChart3, History, CheckCircle, XCircle, Clock } from 'lucide-react';
-import StatCard from './StatCard';
+import { Mail, Send, XCircle, Clock, TrendingUp, BarChart3, Calendar } from 'lucide-react';
 
 const EmailStats = ({ stats }) => {
     if (!stats) {
@@ -12,86 +11,116 @@ const EmailStats = ({ stats }) => {
         );
     }
 
+    // Calculate success rate
+    const successRate = stats.total > 0
+        ? Math.round((stats.byStatus?.sent / stats.total) * 100)
+        : 0;
+
     return (
-        <div className="stats-container fade-in">
-            <div className="section-header">
-                <h2>Analytics Overview</h2>
-                <p className="text-muted">Real-time performance metrics</p>
+        <div className="analytics-wrapper fade-in">
+            <div className="analytics-header">
+                <div className="header-content">
+                    <h2>Analytics Overview</h2>
+                    <p>Real-time performance metrics</p>
+                </div>
+                <div className="date-badge">
+                    <Calendar size={14} />
+                    <span>Today: {new Date().toLocaleDateString()}</span>
+                </div>
             </div>
 
-            <div className="stats-grid">
-                <StatCard
-                    icon={Mail}
-                    label="Total Emails"
-                    value={stats.total}
-                    className="card-blue"
-                />
-                <StatCard
-                    icon={BarChart3}
-                    label="Sent Today"
-                    value={stats.today}
-                    className="card-purple"
-                />
-                <StatCard
-                    icon={History}
-                    label="Last 7 Days"
-                    value={stats.last7Days}
-                    className="card-indigo"
-                />
-            </div>
-
-            <div className="stats-row">
-                <div className="card flex-1">
-                    <div className="card-header">
-                        <h3>Delivery Status</h3>
+            <div className="kpi-grid">
+                {/* Total Emails Card */}
+                <div className="kpi-card total">
+                    <div className="kpi-icon-wrapper">
+                        <Mail size={24} />
                     </div>
-                    <div className="status-breakdown">
-                        <div className="status-item success">
-                            <div className="status-icon-bg">
-                                <CheckCircle size={24} />
-                            </div>
-                            <div className="status-details">
-                                <span className="status-count">{stats.byStatus?.sent || 0}</span>
-                                <span className="status-label">Delivered</span>
-                            </div>
-                            <div className="progress-bar">
+                    <div className="kpi-content">
+                        <span className="kpi-label">Total Emails</span>
+                        <h3 className="kpi-value">{stats.total}</h3>
+                    </div>
+                    <div className="kpi-trend">
+                        <TrendingUp size={16} />
+                        <span>All time</span>
+                    </div>
+                </div>
+
+                {/* Sent Card */}
+                <div className="kpi-card success">
+                    <div className="kpi-icon-wrapper">
+                        <Send size={24} />
+                    </div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Delivered</span>
+                        <h3 className="kpi-value">{stats.byStatus?.sent || 0}</h3>
+                    </div>
+                    <div className="kpi-trend">
+                        <span className="trend-value">{successRate}%</span>
+                        <span>Success Rate</span>
+                    </div>
+                </div>
+
+                {/* Failed Card */}
+                <div className="kpi-card danger">
+                    <div className="kpi-icon-wrapper">
+                        <XCircle size={24} />
+                    </div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Failed</span>
+                        <h3 className="kpi-value">{stats.byStatus?.failed || 0}</h3>
+                    </div>
+                </div>
+
+                {/* Pending Card */}
+                <div className="kpi-card warning">
+                    <div className="kpi-icon-wrapper">
+                        <Clock size={24} />
+                    </div>
+                    <div className="kpi-content">
+                        <span className="kpi-label">Pending</span>
+                        <h3 className="kpi-value">{stats.byStatus?.pending || 0}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div className="charts-section">
+                <div className="chart-card">
+                    <div className="chart-header">
+                        <h3>Delivery Performance</h3>
+                        <BarChart3 size={20} className="text-secondary" />
+                    </div>
+                    <div className="status-bars-vertical">
+                        <div className="v-bar-group">
+                            <div className="v-bar-track">
                                 <div
-                                    className="progress-fill success"
-                                    style={{ width: `${(stats.byStatus?.sent / stats.total * 100) || 0}%` }}
+                                    className="v-bar-fill success"
+                                    style={{ height: `${(stats.byStatus?.sent / stats.total * 100) || 0}%` }}
                                 ></div>
                             </div>
+                            <span className="v-bar-label">Sent</span>
+                            <span className="v-bar-value">{stats.byStatus?.sent || 0}</span>
                         </div>
 
-                        <div className="status-item danger">
-                            <div className="status-icon-bg">
-                                <XCircle size={24} />
-                            </div>
-                            <div className="status-details">
-                                <span className="status-count">{stats.byStatus?.failed || 0}</span>
-                                <span className="status-label">Failed</span>
-                            </div>
-                            <div className="progress-bar">
+                        <div className="v-bar-group">
+                            <div className="v-bar-track">
                                 <div
-                                    className="progress-fill danger"
-                                    style={{ width: `${(stats.byStatus?.failed / stats.total * 100) || 0}%` }}
+                                    className="v-bar-fill danger"
+                                    style={{ height: `${(stats.byStatus?.failed / stats.total * 100) || 0}%` }}
                                 ></div>
                             </div>
+                            <span className="v-bar-label">Failed</span>
+                            <span className="v-bar-value">{stats.byStatus?.failed || 0}</span>
                         </div>
 
-                        <div className="status-item warning">
-                            <div className="status-icon-bg">
-                                <Clock size={24} />
-                            </div>
-                            <div className="status-details">
-                                <span className="status-count">{stats.byStatus?.pending || 0}</span>
-                                <span className="status-label">Pending</span>
-                            </div>
-                            <div className="progress-bar">
+                        <div className="v-bar-group">
+                            <div className="v-bar-track">
                                 <div
-                                    className="progress-fill warning"
-                                    style={{ width: `${(stats.byStatus?.pending / stats.total * 100) || 0}%` }}
+                                    className="v-bar-fill warning"
+                                    style={{ height: `${(stats.byStatus?.pending / stats.total * 100) || 0}%` }}
                                 ></div>
                             </div>
+                            <span className="v-bar-label">Pending</span>
+                            <span className="v-bar-value">{stats.byStatus?.pending || 0}</span>
                         </div>
                     </div>
                 </div>
