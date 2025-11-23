@@ -75,10 +75,10 @@ class EmailService {
           to: mailOptions.to,
           subject: mailOptions.subject
         });
-        
+
         // Simulate email sending delay
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         return {
           messageId: `mock-${Date.now()}@mern-smtp-app`,
           response: '250 Mock email sent successfully'
@@ -125,21 +125,21 @@ class EmailService {
         to: emailData.to,
         subject: emailData.subject,
         text: emailData.message,
-        html: emailData.html || this.formatPlainTextToHTML(emailData.message)
+        html: this.formatPlainTextToHTML(emailData.message, emailData.html)
       };
 
       console.log('Attempting to send email to:', emailData.to);
 
       // Send email
       const result = await this.transporter.sendMail(mailOptions);
-      
+
       console.log('Email sent successfully. Message ID:', result.messageId);
 
       // Update record with success
       await emailRecord.markAsSent(result.messageId);
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         messageId: result.messageId,
         emailId: emailRecord._id,
         message: 'Email sent successfully'
@@ -147,7 +147,7 @@ class EmailService {
 
     } catch (error) {
       console.error('Email sending error:', error);
-      
+
       // Update record with failure if it was created
       if (emailRecord) {
         await emailRecord.markAsFailed(error.message);
@@ -155,7 +155,7 @@ class EmailService {
 
       // Provide user-friendly error messages
       let userMessage = 'Failed to send email';
-      
+
       if (error.message.includes('Invalid login') || error.message.includes('EAUTH')) {
         userMessage = 'Gmail authentication failed. Please check your app password.';
       } else if (error.message.includes('ENOTFOUND')) {
@@ -166,8 +166,8 @@ class EmailService {
         userMessage = error.message;
       }
 
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: userMessage,
         emailId: emailRecord?._id,
         technicalError: error.message
@@ -175,7 +175,7 @@ class EmailService {
     }
   }
 
-  formatPlainTextToHTML(text) {
+  formatPlainTextToHTML(text, extraHtml = null) {
     const formattedText = text
       .replace(/\r\n/g, '<br>')
       .replace(/\n/g, '<br>')
@@ -262,6 +262,7 @@ class EmailService {
               <div class="email-content">
                   <div class="message-body">
                       ${formattedText}
+                      ${extraHtml ? `<br><br><div class="custom-html">${extraHtml}</div>` : ''}
                   </div>
                   <div class="email-footer">
                       <p>Sent via MERN SMTP Application</p>
@@ -289,10 +290,10 @@ class EmailService {
 
       // Build query
       const query = {};
-      
+
       if (status && status !== 'all') query.status = status;
       if (recipient) query.to = { $regex: recipient, $options: 'i' };
-      
+
       if (startDate || endDate) {
         query.createdAt = {};
         if (startDate) {
@@ -343,7 +344,7 @@ class EmailService {
       ]);
 
       const total = await Email.countDocuments();
-      
+
       // Today's count
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -390,17 +391,17 @@ class EmailService {
 
       await this.transporter.verify();
       console.log('✅ SMTP connection verified successfully');
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         smtpConnected: true,
         message: 'SMTP connection is healthy'
       };
     } catch (error) {
       console.error('❌ SMTP connection failed:', error.message);
-      
-      return { 
-        success: false, 
+
+      return {
+        success: false,
         smtpConnected: false,
         error: error.message,
         message: 'SMTP connection failed'
@@ -421,7 +422,7 @@ class EmailService {
   // Method to test email sending with different configurations
   async testEmailSending(testEmail = null) {
     const testTo = testEmail || process.env.GMAIL_USER;
-    
+
     if (!testTo) {
       return {
         success: false,
