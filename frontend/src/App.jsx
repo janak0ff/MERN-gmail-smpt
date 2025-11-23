@@ -9,6 +9,7 @@ import Layout from './components/Layout';
 import ComposeEmail from './components/ComposeEmail';
 import EmailHistory from './components/EmailHistory';
 import EmailStats from './components/EmailStats';
+import AboutUs from './components/AboutUs';
 import { ThemeProvider } from './context/ThemeContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -193,6 +194,10 @@ function App() {
 
         {activeTab === 'stats' && (
           <EmailStats stats={stats} loading={statsLoading} />
+        )}
+
+        {activeTab === 'about' && (
+          <AboutUs />
         )}
       </Layout>
 

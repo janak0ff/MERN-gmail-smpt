@@ -14,17 +14,19 @@ const Header = ({ onCheckHealth }) => {
                         <h1>MERN SMTP</h1>
                         <span className="badge">PRO</span>
                     </div>
-                    <ThemeToggle />
                 </div>
                 <p className="header-subtitle">Professional Email Management System</p>
             </div>
-            <button
-                onClick={onCheckHealth}
-                className="btn btn-glass health-btn"
-            >
-                <span className="pulse-dot"></span>
-                System Health
-            </button>
+            <div className="header-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <ThemeToggle />
+                <button
+                    onClick={onCheckHealth}
+                    className="btn btn-glass health-btn"
+                >
+                    <span className="pulse-dot"></span>
+                    System Health
+                </button>
+            </div>
         </header>
     );
 };

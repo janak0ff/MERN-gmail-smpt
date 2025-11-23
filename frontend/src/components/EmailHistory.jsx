@@ -130,20 +130,44 @@ const EmailHistory = ({
                             <button
                                 disabled={filters.page === 1}
                                 onClick={() => handlePageChange(filters.page - 1)}
-                                className="btn btn-outline"
+                                className="btn-page"
                                 aria-label="Previous Page"
                             >
-                                <ChevronLeft size={20} />
-                                <span>Previous</span>
+                                <ChevronLeft size={16} />
                             </button>
+
+                            {/* Page Numbers */}
+                            {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                                // Logic to show a window of pages around current page
+                                let pageNum;
+                                if (pagination.totalPages <= 5) {
+                                    pageNum = i + 1;
+                                } else if (filters.page <= 3) {
+                                    pageNum = i + 1;
+                                } else if (filters.page >= pagination.totalPages - 2) {
+                                    pageNum = pagination.totalPages - 4 + i;
+                                } else {
+                                    pageNum = filters.page - 2 + i;
+                                }
+
+                                return (
+                                    <button
+                                        key={pageNum}
+                                        className={`btn-page ${filters.page === pageNum ? 'active' : ''}`}
+                                        onClick={() => handlePageChange(pageNum)}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                );
+                            })}
+
                             <button
                                 disabled={filters.page === pagination.totalPages}
                                 onClick={() => handlePageChange(filters.page + 1)}
-                                className="btn btn-outline"
+                                className="btn-page"
                                 aria-label="Next Page"
                             >
-                                <span>Next</span>
-                                <ChevronRight size={20} />
+                                <ChevronRight size={16} />
                             </button>
                         </div>
                     </div>
