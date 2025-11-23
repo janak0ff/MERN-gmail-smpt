@@ -43,8 +43,6 @@ const sendEmailLimiter = rateLimit({
 router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, res) => {
   try {
     console.log('=== Send Email Request ===');
-    console.log('Body:', req.body);
-    console.log('Files:', req.files);
 
     const { to, subject, message, html } = req.body;
 

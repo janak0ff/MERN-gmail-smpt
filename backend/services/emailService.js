@@ -129,7 +129,7 @@ class EmailService {
         to: emailData.to,
         subject: emailData.subject,
         text: emailData.message,
-        html: this.formatPlainTextToHTML(emailData.message, emailData.html),
+        html: this.formatPlainTextToHTML(emailData.message, emailData.html, emailData.attachments),
         attachments: (emailData.attachments && emailData.attachments.length > 0)
           ? emailData.attachments.map(file => ({
             filename: file.originalname,
@@ -196,11 +196,30 @@ class EmailService {
     }
   }
 
-  formatPlainTextToHTML(text, extraHtml = null) {
+  formatPlainTextToHTML(text, extraHtml = null, attachments = []) {
     const formattedText = text
       .replace(/\r\n/g, '<br>')
       .replace(/\n/g, '<br>')
       .replace(/\r/g, '<br>');
+
+    const attachmentList = attachments && attachments.length > 0
+      ? `
+        <div class="attachments-section">
+          <h3>📎 Attached Files (${attachments.length})</h3>
+          <div class="attachment-grid">
+            ${attachments.map(file => `
+              <div class="attachment-item">
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                  <div class="file-name">${file.originalname}</div>
+                  <div class="file-size">${(file.size / 1024).toFixed(1)} KB</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `
+      : '';
 
     return `
       <!DOCTYPE html>
@@ -210,84 +229,192 @@ class EmailService {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Email</title>
           <style>
+              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+              
               body {
-                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                   line-height: 1.6;
-                  color: #333;
-                  max-width: 600px;
-                  margin: 0 auto;
-                  padding: 20px;
-                  background-color: #f5f5f5;
+                  color: #1e293b;
+                  background-color: #f1f5f9;
+                  margin: 0;
+                  padding: 0;
+                  -webkit-font-smoothing: antialiased;
               }
+              
+              .email-wrapper {
+                  width: 100%;
+                  background-color: #f1f5f9;
+                  padding: 40px 0;
+              }
+              
               .email-container {
                   background: white;
-                  border-radius: 10px;
+                  border-radius: 16px;
                   overflow: hidden;
-                  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                  max-width: 600px;
+                  margin: 0 auto;
               }
+              
               .email-header {
-                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                  padding: 30px;
-                  color: white;
+                  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+                  padding: 40px 30px;
                   text-align: center;
+                  color: white;
               }
-              .email-header h1 {
-                  margin: 0;
-                  font-size: 24px;
+              
+              .brand-logo {
+                  font-size: 28px;
+                  font-weight: 800;
+                  letter-spacing: -0.02em;
+                  margin-bottom: 10px;
+                  display: inline-block;
+              }
+              
+              .header-subtitle {
+                  font-size: 14px;
+                  opacity: 0.9;
+                  font-weight: 500;
+              }
+              
+              .email-body {
+                  padding: 40px 30px;
+                  background-color: #ffffff;
+              }
+              
+              .message-content {
+                  font-size: 16px;
+                  color: #334155;
+                  line-height: 1.8;
+                  margin-bottom: 30px;
+              }
+              
+              .custom-html-container {
+                  background-color: #f8fafc;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 12px;
+                  padding: 20px;
+                  margin: 20px 0;
+              }
+              
+              .attachments-section {
+                  margin-top: 30px;
+                  padding-top: 30px;
+                  border-top: 1px solid #e2e8f0;
+              }
+              
+              .attachments-section h3 {
+                  font-size: 14px;
+                  color: #64748b;
+                  text-transform: uppercase;
+                  letter-spacing: 0.05em;
+                  margin-bottom: 15px;
                   font-weight: 600;
               }
-              .email-content {
-                  padding: 30px;
-                  background: #f8f9fa;
+              
+              .attachment-grid {
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                  gap: 10px;
               }
-              .message-body {
-                  background: white;
-                  padding: 25px;
+              
+              .attachment-item {
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  padding: 10px;
+                  background: #f8fafc;
+                  border: 1px solid #e2e8f0;
                   border-radius: 8px;
-                  border-left: 4px solid #667eea;
-                  white-space: pre-line;
-                  line-height: 1.8;
               }
+              
+              .file-icon {
+                  font-size: 20px;
+              }
+              
+              .file-info {
+                  display: flex;
+                  flex-direction: column;
+                  overflow: hidden;
+              }
+              
+              .file-name {
+                  font-size: 13px;
+                  font-weight: 500;
+                  color: #334155;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+              }
+              
+              .file-size {
+                  font-size: 11px;
+                  color: #94a3b8;
+              }
+              
               .email-footer {
-                  margin-top: 20px;
-                  padding-top: 20px;
-                  border-top: 1px solid #e9ecef;
+                  background-color: #f8fafc;
+                  padding: 20px;
                   text-align: center;
-                  color: #6c757d;
-                  font-size: 12px;
+                  border-top: 1px solid #e2e8f0;
               }
-              @media (max-width: 600px) {
-                  body {
-                      padding: 10px;
+              
+              .footer-text {
+                  font-size: 12px;
+                  color: #94a3b8;
+                  margin-bottom: 5px;
+              }
+              
+              .footer-link {
+                  color: #4f46e5;
+                  text-decoration: none;
+                  font-weight: 500;
+              }
+              
+              @media only screen and (max-width: 600px) {
+                  .email-wrapper {
+                      padding: 0;
+                  }
+                  .email-container {
+                      border-radius: 0;
                   }
                   .email-header {
-                      padding: 20px;
+                      padding: 30px 20px;
                   }
-                  .email-header h1 {
-                      font-size: 20px;
+                  .email-body {
+                      padding: 30px 20px;
                   }
-                  .email-content {
-                      padding: 20px;
-                  }
-                  .message-body {
-                      padding: 20px;
+                  .attachment-grid {
+                      grid-template-columns: 1fr;
                   }
               }
           </style>
       </head>
       <body>
-          <div class="email-container">
-              <div class="email-header">
-                  <h1>📧 Email Notification</h1>
-              </div>
-              <div class="email-content">
-                  <div class="message-body">
-                      ${formattedText}
-                      ${extraHtml ? `<br><br><div class="custom-html">${extraHtml}</div>` : ''}
+          <div class="email-wrapper">
+              <div class="email-container">
+                  <div class="email-header">
+                      <div class="brand-logo">✨ MERN SMTP</div>
+                      <div class="header-subtitle">Secure Email Delivery System</div>
                   </div>
+                  
+                  <div class="email-body">
+                      <div class="message-content">
+                          ${formattedText}
+                      </div>
+                      
+                      ${extraHtml ? `<div class="custom-html-container">${extraHtml}</div>` : ''}
+                      
+                      ${attachmentList}
+                  </div>
+                  
                   <div class="email-footer">
-                      <p>Sent via MERN SMTP Application</p>
-                      <p>${new Date().toLocaleDateString()}</p>
+                      <p class="footer-text">Sent securely via MERN SMTP Application</p>
+                      <p class="footer-text">
+                          <a href="#" class="footer-link">Unsubscribe</a> • 
+                          <a href="#" class="footer-link">Privacy Policy</a>
+                      </p>
+                      <p class="footer-text">© ${new Date().getFullYear()} MERN SMTP. All rights reserved.</p>
                   </div>
               </div>
           </div>
@@ -472,7 +599,7 @@ Application Details:
 If you received this email, your SMTP configuration is working correctly!
 
 Best regards,
-MERN SMTP Application`
+  MERN SMTP Application`
     };
 
     return await this.sendEmail(testData);
@@ -493,7 +620,7 @@ MERN SMTP Application`
         let errorMessage = 'Invalid email address';
 
         if (validators[reason] && validators[reason].reason) {
-          errorMessage = `Email validation failed: ${validators[reason].reason}`;
+          errorMessage = `Email validation failed: ${validators[reason].reason} `;
         } else {
           switch (reason) {
             case 'regex': errorMessage = 'Invalid email format'; break;
@@ -501,7 +628,7 @@ MERN SMTP Application`
             case 'disposable': errorMessage = 'Disposable email addresses are not allowed'; break;
             case 'mx': errorMessage = 'Domain does not accept email (MX record missing)'; break;
             case 'smtp': errorMessage = 'Email address does not exist (SMTP check failed)'; break;
-            default: errorMessage = `Invalid email: ${reason}`;
+            default: errorMessage = `Invalid email: ${reason} `;
           }
         }
 
