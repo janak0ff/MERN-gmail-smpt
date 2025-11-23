@@ -9,6 +9,7 @@ import Layout from './components/Layout';
 import ComposeEmail from './components/ComposeEmail';
 import EmailHistory from './components/EmailHistory';
 import EmailStats from './components/EmailStats';
+import { ThemeProvider } from './context/ThemeContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -20,6 +21,8 @@ function App() {
     html: ''
   });
   const [loading, setLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [statsLoading, setStatsLoading] = useState(false);
   const [emails, setEmails] = useState([]);
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('compose');
@@ -85,6 +88,7 @@ function App() {
   };
 
   const fetchEmailHistory = async () => {
+    setHistoryLoading(true);
     try {
       const params = new URLSearchParams();
       Object.keys(filters).forEach(key => {
@@ -99,10 +103,13 @@ function App() {
     } catch (error) {
       console.error('Error fetching email history:', error);
       toast.error('Failed to fetch email history');
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
   const fetchStats = async () => {
+    setStatsLoading(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/email/stats/summary`);
       if (response.data.success) {
@@ -110,6 +117,8 @@ function App() {
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -153,7 +162,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <ThemeProvider>
       <Layout
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -171,17 +180,19 @@ function App() {
         {activeTab === 'history' && (
           <EmailHistory
             emails={emails}
+            loading={historyLoading}
             filters={filters}
             handleFilterChange={handleFilterChange}
             clearFilters={clearFilters}
             pagination={pagination}
-            handlePageChange={handlePageChange}
+            onPageChange={handlePageChange}
+            onRefresh={fetchEmailHistory}
             getStatusIcon={getStatusIcon}
           />
         )}
 
         {activeTab === 'stats' && (
-          <EmailStats stats={stats} />
+          <EmailStats stats={stats} loading={statsLoading} />
         )}
       </Layout>
 
@@ -197,7 +208,7 @@ function App() {
         pauseOnHover
         theme="colored"
       />
-    </div>
+    </ThemeProvider>
   );
 }
 

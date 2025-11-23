@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mail } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 const Header = ({ onCheckHealth }) => {
     return (
@@ -13,6 +14,7 @@ const Header = ({ onCheckHealth }) => {
                         <h1>MERN SMTP</h1>
                         <span className="badge">PRO</span>
                     </div>
+                    <ThemeToggle />
                 </div>
                 <p className="header-subtitle">Professional Email Management System</p>
             </div>

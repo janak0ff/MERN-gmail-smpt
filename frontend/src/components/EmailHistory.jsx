@@ -130,15 +130,19 @@ const EmailHistory = ({
                             <button
                                 disabled={filters.page === 1}
                                 onClick={() => handlePageChange(filters.page - 1)}
-                                className="btn-icon"
+                                className="btn btn-outline"
+                                aria-label="Previous Page"
                             >
                                 <ChevronLeft size={20} />
+                                <span>Previous</span>
                             </button>
                             <button
                                 disabled={filters.page === pagination.totalPages}
                                 onClick={() => handlePageChange(filters.page + 1)}
-                                className="btn-icon"
+                                className="btn btn-outline"
+                                aria-label="Next Page"
                             >
+                                <span>Next</span>
                                 <ChevronRight size={20} />
                             </button>
                         </div>
