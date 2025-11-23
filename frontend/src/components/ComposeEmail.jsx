@@ -57,20 +57,32 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
                     </div>
 
                     {formData.attachments && formData.attachments.length > 0 && (
-                        <div className="attachments-list">
-                            {formData.attachments.map((file, index) => (
-                                <div key={index} className="attachment-item">
-                                    <span className="attachment-name">{file.name}</span>
-                                    <span className="attachment-size">({(file.size / 1024).toFixed(1)} KB)</span>
-                                    <button
-                                        type="button"
-                                        className="remove-attachment"
-                                        onClick={() => removeAttachment(index)}
-                                    >
-                                        <X size={14} />
-                                    </button>
-                                </div>
-                            ))}
+                        <div className="attachments-preview-area">
+                            <div className="attachments-header">
+                                <span className="paperclip-icon"><Paperclip size={14} /></span>
+                                <span>{formData.attachments.length} file{formData.attachments.length !== 1 ? 's' : ''} attached</span>
+                            </div>
+                            <div className="attachments-grid">
+                                {formData.attachments.map((file, index) => (
+                                    <div key={index} className="attachment-card fade-in">
+                                        <div className="attachment-icon">
+                                            <FileCode size={20} />
+                                        </div>
+                                        <div className="attachment-info">
+                                            <span className="attachment-name" title={file.name}>{file.name}</span>
+                                            <span className="attachment-size">{(file.size / 1024).toFixed(1)} KB</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="remove-attachment-btn"
+                                            onClick={() => removeAttachment(index)}
+                                            title="Remove file"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 
@@ -96,16 +108,8 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
                     </div>
 
                     <div className="compose-footer">
-                        <div className="toolbar">
-                            <button
-                                type="button"
-                                className={`tool-btn ${showHtml ? 'active' : ''}`}
-                                title="Toggle HTML Editor"
-                                onClick={() => setShowHtml(!showHtml)}
-                            >
-                                <PenTool size={18} />
-                            </button>
-                            <div className="file-input-wrapper">
+                        <div className="toolbar-left">
+                            <div className="file-input-container">
                                 <input
                                     type="file"
                                     id="file-upload"
@@ -113,16 +117,18 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
                                     onChange={handleFileChange}
                                     className="hidden-file-input"
                                 />
-                                <label htmlFor="file-upload" className="tool-btn" title="Attach Files">
+                                <label htmlFor="file-upload" className="attach-file-btn">
                                     <Paperclip size={18} />
+                                    <span>Attach Files</span>
                                 </label>
                             </div>
+
                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="btn-send"
+                            className="btn-send-primary"
                         >
                             {loading ? (
                                 <>
