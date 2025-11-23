@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const Email = require('../models/Email');
+const dns = require('dns').promises;
 
 class EmailService {
   constructor() {
@@ -105,6 +106,9 @@ class EmailService {
       if (!emailRegex.test(emailData.to)) {
         throw new Error('Invalid recipient email address');
       }
+
+      // Validate domain MX records
+      await this.validateDomain(emailData.to);
 
       // Create email record in database with pending status
       emailRecord = new Email({
@@ -447,6 +451,23 @@ MERN SMTP Application`
     };
 
     return await this.sendEmail(testData);
+  }
+
+  async validateDomain(email) {
+    try {
+      const domain = email.split('@')[1];
+      const mxRecords = await dns.resolveMx(domain);
+
+      if (!mxRecords || mxRecords.length === 0) {
+        throw new Error(`Domain ${domain} does not accept email (no MX records found)`);
+      }
+      return true;
+    } catch (error) {
+      if (error.code === 'ENOTFOUND' || error.code === 'ENODATA') {
+        throw new Error(`Domain ${email.split('@')[1]} not found or invalid`);
+      }
+      throw error;
+    }
   }
 }
 
