@@ -30,14 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/email', require('./routes/email'));
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Server is running',
-    timestamp: new Date().toISOString()
-  });
-});
+
 
 // MongoDB connection with retry logic
 const connectDB = async () => {
@@ -59,17 +52,18 @@ connectDB();
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     success: false,
-    message: 'Something went wrong!' 
+    message: 'Something went wrong!'
   });
 });
 
 // 404 handler
+// Block all other routes
 app.use('*', (req, res) => {
-  res.status(404).json({ 
+  res.status(403).json({
     success: false,
-    message: 'Route not found' 
+    message: 'Access Denied'
   });
 });
 
