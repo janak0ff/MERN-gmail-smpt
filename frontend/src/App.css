@@ -537,8 +537,10 @@ textarea.form-control {
 .table-responsive {
   overflow-x: auto;
   overflow-y: auto;
-  max-height: calc(100vh - 300px);
-  /* Adjust based on header/filters height */
+  flex: 1;
+  /* Take remaining height */
+  min-height: 0;
+  /* Allow shrinking */
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
 }
@@ -937,54 +939,124 @@ textarea.form-control {
   }
 }
 
-/* About Us */
-.about-card {
-  text-align: center;
-  max-width: 800px;
+/* About Us Redesign */
+.about-container {
+  max-width: 1000px;
   margin: 0 auto;
+  padding-bottom: 2rem;
 }
 
-.about-header {
-  margin-bottom: 2rem;
-}
-
-.about-logo {
-  width: 80px;
-  height: 80px;
+.about-hero {
+  text-align: center;
+  padding: 3rem 1rem;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   border-radius: 20px;
+  color: white;
+  margin-bottom: 3rem;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem;
-  color: white;
-  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+  backdrop-filter: blur(5px);
 }
 
-.mission-section {
+.about-hero h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+}
+
+.hero-badges {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.hero-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  backdrop-filter: blur(5px);
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
   margin-bottom: 3rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-.feature-item {
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
   padding: 1.5rem;
-  background-color: var(--bg-main);
-  border-radius: var(--border-radius);
   transition: var(--transition);
+  position: relative;
+  overflow: hidden;
 }
 
-.feature-item:hover {
+.glass-card:hover {
   transform: translateY(-5px);
-  background-color: var(--bg-card);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary);
 }
 
-.feature-icon-wrapper {
-  width: 50px;
-  height: 50px;
-  background-color: rgba(99, 102, 241, 0.1);
+.mission-card {
+  grid-column: 1 / -1;
+  background: linear-gradient(to right bottom, var(--bg-card), rgba(99, 102, 241, 0.05));
+  text-align: center;
+  padding: 2.5rem;
+}
+
+.card-icon {
+  width: 60px;
+  height: 60px;
+  background: rgba(99, 102, 241, 0.1);
   color: var(--primary);
   border-radius: 50%;
   display: flex;
@@ -993,44 +1065,66 @@ textarea.form-control {
   margin: 0 auto 1rem;
 }
 
-.social-links {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin: 3rem 0;
+.feature-card {
+  text-align: center;
 }
 
-.social-link {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.feature-card svg {
+  margin-bottom: 1rem;
+}
+
+.feature-card h4 {
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+}
+
+.feature-card p {
+  font-size: 0.9rem;
   color: var(--text-secondary);
-  background-color: var(--bg-main);
-  transition: var(--transition);
 }
 
-.social-link:hover {
-  transform: translateY(-3px);
-  color: white;
+.social-section {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.social-link.github:hover {
-  background-color: #333;
+.social-section h3 {
+  margin-bottom: 1.5rem;
+  color: var(--text-main);
 }
 
-.social-link.linkedin:hover {
-  background-color: #0077b5;
-}
-
-.social-link.twitter:hover {
-  background-color: #1da1f2;
+.about-footer {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.9rem;
 }
 
 .heart-icon {
   color: var(--danger);
   display: inline-block;
   animation: pulse 1.5s infinite;
+}
+
+/* History Container Layout */
+.history-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-container .card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  margin-bottom: 0;
+}
+
+.pagination-bar {
+  margin-top: auto;
+  /* Push to bottom */
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+  /* Don't shrink */
 }
