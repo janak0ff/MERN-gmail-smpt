@@ -1482,6 +1482,218 @@ body {
   background: var(--bg-card);
 }
 
+/* Email History Grid Layout */
+.history-grid-container {
+  width: 100%;
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
+}
+
+.history-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.history-header {
+  display: grid;
+  grid-template-columns: 120px 1.5fr 2fr 1fr 80px;
+  padding: 1rem 1.5rem;
+  background: var(--bg-main);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  align-items: center;
+}
+
+.history-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: 120px 1.5fr 2fr 1fr 80px;
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  align-items: center;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.history-row:hover {
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-light);
+  z-index: 1;
+}
+
+.h-col {
+  padding: 0 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.h-col.status {
+  display: flex;
+  align-items: center;
+}
+
+.h-col.recipient {
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.h-col.subject {
+  color: var(--text-secondary);
+}
+
+.h-col.date {
+  font-size: 0.9rem;
+}
+
+.date-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.h-col.actions {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-icon-glass {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-icon-glass:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: rotate(15deg);
+}
+
+/* Mobile Responsive Card View */
+@media (max-width: 900px) {
+  .history-header {
+    display: none;
+  }
+
+  .history-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .h-col {
+    padding: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Add labels for mobile */
+  .h-col::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-right: 1rem;
+  }
+
+  .h-col.status {
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+  }
+
+  .h-col.status::before {
+    display: none;
+    /* Status badge is self-explanatory or positioned differently */
+  }
+
+  /* Special positioning for status on mobile */
+  .h-col.status {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: auto;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .h-col.recipient {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    order: -1;
+    /* Move to top */
+  }
+
+  .h-col.recipient::before {
+    display: none;
+  }
+
+  .h-col.subject {
+    order: 2;
+  }
+
+  .h-col.date {
+    order: 3;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .h-col.actions {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: auto;
+  }
+
+  .h-col.actions::before {
+    display: none;
+  }
+}
+
+/* Animation for rows */
+.fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .history-header h2 {
   font-size: 1.25rem;
   font-weight: 600;

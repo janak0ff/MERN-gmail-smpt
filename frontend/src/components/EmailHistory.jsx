@@ -70,7 +70,7 @@ const EmailHistory = ({
                     </div>
                 </div>
 
-                <div className="table-responsive">
+                <div className="history-grid-container">
                     {emails.length === 0 ? (
                         <div className="empty-state">
                             <div className="empty-icon-wrapper">
@@ -80,44 +80,47 @@ const EmailHistory = ({
                             <p>Try adjusting your filters or send a new email.</p>
                         </div>
                     ) : (
-                        <table className="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Status</th>
-                                    <th>Recipient</th>
-                                    <th>Subject</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <div className="history-grid">
+                            {/* Header Row - Hidden on Mobile */}
+                            <div className="history-header">
+                                <div className="h-col status">Status</div>
+                                <div className="h-col recipient">Recipient</div>
+                                <div className="h-col subject">Subject</div>
+                                <div className="h-col date">Date</div>
+                                <div className="h-col actions">Actions</div>
+                            </div>
+
+                            {/* Data Rows */}
+                            <div className="history-body">
                                 {emails.map((email) => (
-                                    <tr key={email._id}>
-                                        <td>
+                                    <div key={email._id} className="history-row fade-in-up">
+                                        <div className="h-col status" data-label="Status">
                                             <span className={`status-badge-pill ${email.status}`}>
                                                 {getStatusIcon(email.status)}
                                                 {email.status}
                                             </span>
-                                        </td>
-                                        <td className="font-medium">{email.to}</td>
-                                        <td className="text-truncate" style={{ maxWidth: '200px' }}>
-                                            {email.subject}
-                                        </td>
-                                        <td>
-                                            {new Date(email.createdAt).toLocaleDateString()}
-                                            <span className="time-sub">
-                                                {new Date(email.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button className="btn-icon" title="View Details">
+                                        </div>
+                                        <div className="h-col recipient" data-label="To">
+                                            <span className="cell-text">{email.to}</span>
+                                        </div>
+                                        <div className="h-col subject" data-label="Subject">
+                                            <span className="cell-text text-truncate">{email.subject}</span>
+                                        </div>
+                                        <div className="h-col date" data-label="Date">
+                                            <div className="date-wrapper">
+                                                <span className="date-text">{new Date(email.createdAt).toLocaleDateString()}</span>
+                                                <span className="time-sub">{new Date(email.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
+                                        </div>
+                                        <div className="h-col actions" data-label="Actions">
+                                            <button className="btn-icon-glass" title="View Details">
                                                 <Mail size={16} />
                                             </button>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                    </div>
                                 ))}
-                            </tbody>
-                        </table>
+                            </div>
+                        </div>
                     )}
                 </div>
 
