@@ -1,19 +1,22 @@
 import React from 'react';
-import Header from './Header';
-import Sidebar from './Sidebar';
+import Navbar from './Navbar';
 
 const Layout = ({ children, activeTab, setActiveTab, onCheckHealth }) => {
     return (
         <div className="app-layout">
-            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-            <div className="main-wrapper">
-                <Header onCheckHealth={onCheckHealth} />
-                <main className="main-content">
+            <Navbar
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                onCheckHealth={onCheckHealth}
+            />
+
+            <main className="main-wrapper">
+                <div className="main-content">
                     <div className="content-container">
                         {children}
                     </div>
-                </main>
-            </div>
+                </div>
+            </main>
         </div>
     );
 };

@@ -1,9 +1,10 @@
 import React from 'react';
-import { Send, History, BarChart3, Info } from 'lucide-react';
+import { PenSquare, History, BarChart3, Info, Home } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
     const navItems = [
-        { id: 'compose', icon: Send, label: 'Compose' },
+        { id: 'home', icon: Home, label: 'Home' },
+        { id: 'compose', icon: PenSquare, label: 'Compose' },
         { id: 'history', icon: History, label: 'History' },
         { id: 'stats', icon: BarChart3, label: 'Analytics' },
         { id: 'about', icon: Info, label: 'About Us' },

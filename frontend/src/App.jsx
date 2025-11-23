@@ -10,6 +10,7 @@ import ComposeEmail from './components/ComposeEmail';
 import EmailHistory from './components/EmailHistory';
 import EmailStats from './components/EmailStats';
 import AboutUs from './components/AboutUs';
+import LandingPage from './components/LandingPage';
 import { ThemeProvider } from './context/ThemeContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -26,7 +27,7 @@ function App() {
   const [statsLoading, setStatsLoading] = useState(false);
   const [emails, setEmails] = useState([]);
   const [stats, setStats] = useState(null);
-  const [activeTab, setActiveTab] = useState('compose');
+  const [activeTab, setActiveTab] = useState('home');
   const [pagination, setPagination] = useState({});
   const [filters, setFilters] = useState({
     status: '',
@@ -169,6 +170,10 @@ function App() {
         setActiveTab={setActiveTab}
         onCheckHealth={checkSMTPHealth}
       >
+        {activeTab === 'home' && (
+          <LandingPage onGetStarted={() => setActiveTab('compose')} />
+        )}
+
         {activeTab === 'compose' && (
           <ComposeEmail
             formData={formData}

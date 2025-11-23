@@ -7,15 +7,18 @@ const ThemeToggle = () => {
 
     return (
         <button
-            className="theme-toggle"
+            className="theme-toggle-btn"
             onClick={toggleTheme}
             aria-label="Toggle theme"
         >
-            <div className="theme-icon sun">
-                <Sun size={20} />
-            </div>
-            <div className="theme-icon moon">
-                <Moon size={20} />
+            <div className="toggle-track">
+                <div className="toggle-icon sun">
+                    <Sun size={18} />
+                </div>
+                <div className="toggle-icon moon">
+                    <Moon size={18} />
+                </div>
+                <div className="toggle-thumb" />
             </div>
         </button>
     );
