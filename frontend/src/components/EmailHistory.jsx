@@ -14,7 +14,10 @@ const EmailHistory = ({
         <div className="history-container fade-in">
             <div className="card">
                 <div className="card-header flex-between">
-                    <h2>Email History</h2>
+                    <div className="header-content">
+                        <h2>Email History</h2>
+                        <p>Track and manage your email logs</p>
+                    </div>
 
                 </div>
 
