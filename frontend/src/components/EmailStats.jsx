@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Send, XCircle, Clock, TrendingUp, BarChart3, Calendar } from 'lucide-react';
+import { Mail, Send, XCircle, Clock, TrendingUp, BarChart3, Calendar, CheckCircle, Layers } from 'lucide-react';
 
 const EmailStats = ({ stats }) => {
     if (!stats) {
@@ -25,7 +25,7 @@ const EmailStats = ({ stats }) => {
                 </div>
                 <div className="date-badge">
                     <Calendar size={14} />
-                    <span>Today: {new Date().toLocaleDateString()}</span>
+                    <span>Last 30 Days</span>
                 </div>
             </div>
 
@@ -41,7 +41,7 @@ const EmailStats = ({ stats }) => {
                     </div>
                     <div className="kpi-trend">
                         <TrendingUp size={16} />
-                        <span>All time</span>
+                        <span>Last 30 Days</span>
                     </div>
                 </div>
 
@@ -86,41 +86,59 @@ const EmailStats = ({ stats }) => {
             <div className="charts-section">
                 <div className="chart-card">
                     <div className="chart-header">
-                        <h3>Delivery Performance</h3>
+                        <h3>Delivery Performance (Last 30 Days)</h3>
                         <BarChart3 size={20} className="text-secondary" />
                     </div>
-                    <div className="status-bars-vertical">
-                        <div className="v-bar-group">
-                            <div className="v-bar-track">
+                    <div className="status-bars-horizontal">
+                        {/* Processed Bar (Success + Failed) */}
+                        <div className="h-bar-item">
+                            <div className="h-bar-info">
+                                <div className="h-bar-label">
+                                    <Layers size={18} className="text-primary" />
+                                    <span>Processed</span>
+                                </div>
+                                <span className="h-bar-value">{(stats.byStatus?.sent || 0) + (stats.byStatus?.failed || 0)}</span>
+                            </div>
+                            <div className="h-bar-track">
                                 <div
-                                    className="v-bar-fill success"
-                                    style={{ height: `${(stats.byStatus?.sent / stats.total * 100) || 0}%` }}
+                                    className="h-bar-fill primary"
+                                    style={{ width: `${((stats.byStatus?.sent || 0) + (stats.byStatus?.failed || 0)) / stats.total * 100 || 0}%` }}
                                 ></div>
                             </div>
-                            <span className="v-bar-label">Sent</span>
-                            <span className="v-bar-value">{stats.byStatus?.sent || 0}</span>
                         </div>
 
-                        <div className="v-bar-group">
-                            <div className="v-bar-track">
+                        {/* Success Bar */}
+                        <div className="h-bar-item">
+                            <div className="h-bar-info">
+                                <div className="h-bar-label">
+                                    <CheckCircle size={18} className="text-success" />
+                                    <span>Delivered</span>
+                                </div>
+                                <span className="h-bar-value">{stats.byStatus?.sent || 0}</span>
+                            </div>
+                            <div className="h-bar-track">
                                 <div
-                                    className="v-bar-fill danger"
-                                    style={{ height: `${(stats.byStatus?.failed / stats.total * 100) || 0}%` }}
+                                    className="h-bar-fill success"
+                                    style={{ width: `${(stats.byStatus?.sent / stats.total * 100) || 0}%` }}
                                 ></div>
                             </div>
-                            <span className="v-bar-label">Failed</span>
-                            <span className="v-bar-value">{stats.byStatus?.failed || 0}</span>
                         </div>
 
-                        <div className="v-bar-group">
-                            <div className="v-bar-track">
+                        {/* Failed Bar */}
+                        <div className="h-bar-item">
+                            <div className="h-bar-info">
+                                <div className="h-bar-label">
+                                    <XCircle size={18} className="text-danger" />
+                                    <span>Failed</span>
+                                </div>
+                                <span className="h-bar-value">{stats.byStatus?.failed || 0}</span>
+                            </div>
+                            <div className="h-bar-track">
                                 <div
-                                    className="v-bar-fill warning"
-                                    style={{ height: `${(stats.byStatus?.pending / stats.total * 100) || 0}%` }}
+                                    className="h-bar-fill danger"
+                                    style={{ width: `${(stats.byStatus?.failed / stats.total * 100) || 0}%` }}
                                 ></div>
                             </div>
-                            <span className="v-bar-label">Pending</span>
-                            <span className="v-bar-value">{stats.byStatus?.pending || 0}</span>
                         </div>
                     </div>
                 </div>

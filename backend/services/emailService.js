@@ -356,11 +356,15 @@ class EmailService {
         createdAt: { $gte: today }
       });
 
-      // Last 7 days count
-      const last7Days = new Date();
-      last7Days.setDate(last7Days.getDate() - 7);
       const last7DaysCount = await Email.countDocuments({
         createdAt: { $gte: last7Days }
+      });
+
+      // Last 30 days count
+      const last30Days = new Date();
+      last30Days.setDate(last30Days.getDate() - 30);
+      const last30DaysCount = await Email.countDocuments({
+        createdAt: { $gte: last30Days }
       });
 
       // This month count
@@ -375,6 +379,7 @@ class EmailService {
         total,
         today: todayCount,
         last7Days: last7DaysCount,
+        last30Days: last30DaysCount,
         thisMonth: thisMonthCount,
         byStatus: stats.reduce((acc, stat) => {
           acc[stat._id] = stat.count;

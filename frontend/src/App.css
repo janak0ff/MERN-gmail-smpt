@@ -1500,6 +1500,7 @@ body {
   margin-bottom: 0.25rem;
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, var(--text-main) 0%, var(--text-secondary) 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -1645,71 +1646,85 @@ body {
   color: var(--text-main);
 }
 
-.status-bars-vertical {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-end;
-  height: 220px;
-  padding-bottom: 1rem;
-}
-
-.v-bar-group {
+.status-bars-horizontal {
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.h-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.h-bar-info {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  height: 100%;
-  justify-content: flex-end;
-  width: 80px;
-  transition: transform 0.2s;
 }
 
-.v-bar-group:hover {
-  transform: translateY(-5px);
+.h-bar-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 0.95rem;
 }
 
-.v-bar-track {
-  width: 16px;
-  height: 100%;
+.h-bar-value {
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 1rem;
+}
+
+.h-bar-track {
+  width: 100%;
+  height: 12px;
   background: rgba(0, 0, 0, 0.03);
-  /* Very subtle track */
   border-radius: 50px;
   position: relative;
   overflow: hidden;
 }
 
-.v-bar-fill {
+.h-bar-fill {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
-  width: 100%;
+  height: 100%;
   border-radius: 50px;
-  transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.v-bar-fill.success {
-  background: linear-gradient(to top, var(--success), #34d399);
+.h-bar-fill.primary {
+  background: linear-gradient(90deg, var(--success) 0%, var(--danger) 100%);
 }
 
-.v-bar-fill.danger {
-  background: linear-gradient(to top, var(--danger), #f87171);
+.h-bar-fill.success {
+  background: linear-gradient(90deg, var(--success), #34d399);
 }
 
-.v-bar-fill.warning {
-  background: linear-gradient(to top, var(--warning), #fbbf24);
+.h-bar-fill.danger {
+  background: linear-gradient(90deg, var(--danger), #f87171);
 }
 
-.v-bar-label {
-  font-size: 0.9rem;
+.text-primary {
+  color: var(--primary);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
+.text-secondary {
   color: var(--text-secondary);
-  font-weight: 600;
-}
-
-.v-bar-value {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-main);
 }
 
 @media (max-width: 768px) {
