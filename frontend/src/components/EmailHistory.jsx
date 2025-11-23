@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, Search, Calendar } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, Search, Calendar, RotateCcw } from 'lucide-react';
 
 const EmailHistory = ({
     emails,
@@ -15,9 +15,7 @@ const EmailHistory = ({
             <div className="card">
                 <div className="card-header flex-between">
                     <h2>Email History</h2>
-                    <button onClick={clearFilters} className="btn btn-text">
-                        Reset Filters
-                    </button>
+
                 </div>
 
                 <div className="filters-bar">
@@ -68,6 +66,12 @@ const EmailHistory = ({
                             className="filter-input"
                         />
                     </div>
+                    <div className="filter-item">
+                        <button onClick={clearFilters} className="btn-reset-pill" title="Reset Filters">
+                            <RotateCcw size={16} />
+                            <span>Reset</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div className="history-grid-container">
@@ -82,7 +86,8 @@ const EmailHistory = ({
                     ) : (
                         <div className="history-grid">
                             {/* Header Row - Hidden on Mobile */}
-                            <div className="history-header">
+                            {/* Header Row - Hidden on Mobile */}
+                            <div className="history-header-row">
                                 <div className="h-col status">Status</div>
                                 <div className="h-col recipient">Recipient</div>
                                 <div className="h-col subject">Subject</div>
