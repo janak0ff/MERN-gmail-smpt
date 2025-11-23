@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const Email = require('../models/Email');
-const dns = require('dns').promises;
+const emailValidator = require('deep-email-validator');
 
 class EmailService {
   constructor() {
@@ -107,8 +107,8 @@ class EmailService {
         throw new Error('Invalid recipient email address');
       }
 
-      // Validate domain MX records
-      await this.validateDomain(emailData.to);
+      // Validate email deeply (SMTP check)
+      await this.validateEmailDeeply(emailData.to);
 
       // Create email record in database with pending status
       emailRecord = new Email({
@@ -453,20 +453,50 @@ MERN SMTP Application`
     return await this.sendEmail(testData);
   }
 
-  async validateDomain(email) {
+  async validateEmailDeeply(email) {
     try {
-      const domain = email.split('@')[1];
-      const mxRecords = await dns.resolveMx(domain);
+      const { valid, reason, validators } = await emailValidator.validate({
+        email: email,
+        validateRegex: true,
+        validateMx: true,
+        validateTypo: true,
+        validateDisposable: true,
+        validateSMTP: true,
+      });
 
-      if (!mxRecords || mxRecords.length === 0) {
-        throw new Error(`Domain ${domain} does not accept email (no MX records found)`);
+      if (!valid) {
+        let errorMessage = 'Invalid email address';
+
+        if (validators[reason] && validators[reason].reason) {
+          errorMessage = `Email validation failed: ${validators[reason].reason}`;
+        } else {
+          switch (reason) {
+            case 'regex': errorMessage = 'Invalid email format'; break;
+            case 'typo': errorMessage = 'Did you mean ' + validators.typo?.reason + '?'; break;
+            case 'disposable': errorMessage = 'Disposable email addresses are not allowed'; break;
+            case 'mx': errorMessage = 'Domain does not accept email (MX record missing)'; break;
+            case 'smtp': errorMessage = 'Email address does not exist (SMTP check failed)'; break;
+            default: errorMessage = `Invalid email: ${reason}`;
+          }
+        }
+
+        throw new Error(errorMessage);
       }
+
       return true;
     } catch (error) {
-      if (error.code === 'ENOTFOUND' || error.code === 'ENODATA') {
-        throw new Error(`Domain ${email.split('@')[1]} not found or invalid`);
+      // If it's our own error, rethrow it
+      if (error.message.startsWith('Email validation failed') ||
+        error.message.startsWith('Invalid email') ||
+        error.message.startsWith('Disposable') ||
+        error.message.startsWith('Domain') ||
+        error.message.startsWith('Did you mean')) {
+        throw error;
       }
-      throw error;
+
+      // Log unexpected validation errors but allow sending (fail open) to avoid blocking valid emails due to network issues
+      console.warn('Deep email validation warning:', error.message);
+      return true;
     }
   }
 }
