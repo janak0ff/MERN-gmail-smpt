@@ -1,5 +1,5 @@
-import React from 'react';
-import { Mail, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, Search, Calendar, RotateCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, Search, Calendar, RotateCcw, Paperclip, X, FileCode, Eye } from 'lucide-react';
 
 const EmailHistory = ({
     emails,
@@ -10,6 +10,18 @@ const EmailHistory = ({
     handlePageChange,
     getStatusIcon
 }) => {
+    const [selectedEmail, setSelectedEmail] = useState(null);
+
+    const openEmailDetails = (email) => {
+        setSelectedEmail(email);
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    };
+
+    const closeEmailDetails = () => {
+        setSelectedEmail(null);
+        document.body.style.overflow = 'auto';
+    };
+
     return (
         <div className="history-container fade-in">
             <div className="card">
@@ -18,7 +30,6 @@ const EmailHistory = ({
                         <h2>Email History</h2>
                         <p>Track and manage your email logs</p>
                     </div>
-
                 </div>
 
                 <div className="filters-bar">
@@ -89,7 +100,6 @@ const EmailHistory = ({
                     ) : (
                         <div className="history-grid">
                             {/* Header Row - Hidden on Mobile */}
-                            {/* Header Row - Hidden on Mobile */}
                             <div className="history-header-row">
                                 <div className="h-col status">Status</div>
                                 <div className="h-col recipient">Recipient</div>
@@ -112,7 +122,14 @@ const EmailHistory = ({
                                             <span className="cell-text">{email.to}</span>
                                         </div>
                                         <div className="h-col subject" data-label="Subject">
-                                            <span className="cell-text text-truncate">{email.subject}</span>
+                                            <div className="subject-wrapper">
+                                                <span className="cell-text text-truncate">{email.subject}</span>
+                                                {email.attachments && email.attachments.length > 0 && (
+                                                    <span className="attachment-indicator" title={`${email.attachments.length} attachment(s)`}>
+                                                        <Paperclip size={14} />
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="h-col date" data-label="Date">
                                             <div className="date-wrapper">
@@ -121,8 +138,12 @@ const EmailHistory = ({
                                             </div>
                                         </div>
                                         <div className="h-col actions" data-label="Actions">
-                                            <button className="btn-icon-glass" title="View Details">
-                                                <Mail size={16} />
+                                            <button
+                                                className="btn-icon-glass"
+                                                title="View Details"
+                                                onClick={() => openEmailDetails(email)}
+                                            >
+                                                <Eye size={16} />
                                             </button>
                                         </div>
                                     </div>
@@ -149,7 +170,6 @@ const EmailHistory = ({
 
                             {/* Page Numbers */}
                             {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                                // Logic to show a window of pages around current page
                                 let pageNum;
                                 if (pagination.totalPages <= 5) {
                                     pageNum = i + 1;
@@ -184,6 +204,87 @@ const EmailHistory = ({
                     </div>
                 )}
             </div>
+
+            {/* Email Details Modal */}
+            {selectedEmail && (
+                <div className="modal-overlay fade-in" onClick={closeEmailDetails}>
+                    <div className="modal-content slide-up" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Email Details</h3>
+                            <button className="btn-close-modal" onClick={closeEmailDetails}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="detail-group">
+                                <label>Status</label>
+                                <span className={`status-badge-pill ${selectedEmail.status}`}>
+                                    {getStatusIcon(selectedEmail.status)}
+                                    {selectedEmail.status}
+                                </span>
+                            </div>
+                            <div className="detail-row">
+                                <div className="detail-group">
+                                    <label>To</label>
+                                    <div className="detail-value">{selectedEmail.to}</div>
+                                </div>
+                                <div className="detail-group">
+                                    <label>Date</label>
+                                    <div className="detail-value">
+                                        {new Date(selectedEmail.createdAt).toLocaleString()}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="detail-group">
+                                <label>Subject</label>
+                                <div className="detail-value subject">{selectedEmail.subject}</div>
+                            </div>
+
+                            <div className="detail-group">
+                                <label>Message</label>
+                                <div className="message-preview">
+                                    {selectedEmail.message}
+                                </div>
+                            </div>
+
+                            {selectedEmail.html && (
+                                <div className="detail-group">
+                                    <label>HTML Content</label>
+                                    <div className="html-preview">
+                                        <div className="code-badge">HTML</div>
+                                        <pre>{selectedEmail.html}</pre>
+                                    </div>
+                                </div>
+                            )}
+
+                            {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
+                                <div className="detail-group">
+                                    <label>Attachments ({selectedEmail.attachments.length})</label>
+                                    <div className="modal-attachments-grid">
+                                        {selectedEmail.attachments.map((file, idx) => (
+                                            <div key={idx} className="modal-attachment-card">
+                                                <div className="file-icon-sm">
+                                                    <FileCode size={16} />
+                                                </div>
+                                                <div className="file-info-sm">
+                                                    <span className="file-name-sm" title={file.filename}>{file.filename}</span>
+                                                    <span className="file-size-sm">{(file.size / 1024).toFixed(1)} KB</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {selectedEmail.error && (
+                                <div className="error-box">
+                                    <strong>Error:</strong> {selectedEmail.error}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
