@@ -101,15 +101,6 @@ class EmailService {
         throw new Error('Missing required fields: to, subject, or message');
       }
 
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailData.to)) {
-        throw new Error('Invalid recipient email address');
-      }
-
-      // Validate email deeply (SMTP check)
-      await this.validateEmailDeeply(emailData.to);
-
       // Create email record in database with pending status
       emailRecord = new Email({
         from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
@@ -122,6 +113,15 @@ class EmailService {
 
       await emailRecord.save();
       console.log(`Email record created with ID: ${emailRecord._id}`);
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailData.to)) {
+        throw new Error('Invalid recipient email address');
+      }
+
+      // Validate email deeply (SMTP check)
+      await this.validateEmailDeeply(emailData.to);
 
       // Prepare email options
       const mailOptions = {
