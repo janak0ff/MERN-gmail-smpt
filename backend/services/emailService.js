@@ -356,6 +356,9 @@ class EmailService {
         createdAt: { $gte: today }
       });
 
+      // Last 7 days count
+      const last7Days = new Date();
+      last7Days.setDate(last7Days.getDate() - 7);
       const last7DaysCount = await Email.countDocuments({
         createdAt: { $gte: last7Days }
       });

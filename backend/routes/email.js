@@ -117,6 +117,24 @@ router.get('/history', async (req, res) => {
   }
 });
 
+// Get email statistics
+router.get('/stats/summary', async (req, res) => {
+  try {
+    const stats = await emailService.getEmailStats();
+
+    res.status(200).json({
+      success: true,
+      ...stats
+    });
+  } catch (error) {
+    console.error('Get email stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
 // Get specific email by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -142,23 +160,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Get email statistics
-router.get('/stats/summary', async (req, res) => {
-  try {
-    const stats = await emailService.getEmailStats();
 
-    res.status(200).json({
-      success: true,
-      ...stats
-    });
-  } catch (error) {
-    console.error('Get email stats error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-});
 
 // Check SMTP connection
 router.get('/health/check', async (req, res) => {
