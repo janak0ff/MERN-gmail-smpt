@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Zap, Globe, Heart, Code, Github, Linkedin, Twitter, Mail, ExternalLink, ArrowRight } from 'lucide-react';
+import { Shield, Zap, Globe, Heart, Code, Github, Linkedin, Mail, ExternalLink, ArrowRight, Sparkles, Target, Users } from 'lucide-react';
 
 const AboutUs = () => {
     return (
@@ -7,25 +7,26 @@ const AboutUs = () => {
             <div className="about-header-modern">
                 <div className="brand-pill">
                     <Mail size={16} />
-                    <span>MERN SMTP v1.0</span>
+                    <span>Quick Mail v1.0</span>
                 </div>
-                <h1>Redefining Email Infrastructure</h1>
+                <h1>Empowering Communication Through Code</h1>
                 <p className="hero-subtitle">
-                    A powerful, open-source solution for seamless email delivery.
-                    Built for developers who demand reliability and speed.
+                    Quick Mail is a modern email delivery platform built with passion for developers
+                    who value reliability, security, and simplicity. Born from the need for a self-hosted,
+                    transparent email solution with beautiful UI.
                 </p>
             </div>
 
             <div className="mission-section glass-card">
                 <div className="mission-content">
                     <div className="icon-box primary">
-                        <Zap size={28} />
+                        <Target size={28} />
                     </div>
                     <h2>Our Mission</h2>
                     <p>
-                        To empower developers with a robust, secure, and efficient email infrastructure.
-                        We simplify communication workflows while ensuring maximum deliverability,
-                        so you can focus on building great applications.
+                        To provide developers with a powerful, transparent, and easy-to-use email infrastructure
+                        that puts control back in their hands. We believe in self-hosted solutions that respect
+                        your privacy while delivering enterprise-grade features with a premium user experience.
                     </p>
                 </div>
             </div>
@@ -35,29 +36,61 @@ const AboutUs = () => {
                     <div className="icon-box success">
                         <Shield size={24} />
                     </div>
-                    <h3>Secure Sending</h3>
-                    <p>Enterprise-grade security with OAuth2 authentication and encrypted transmission.</p>
+                    <h3>Privacy First</h3>
+                    <p>Self-hosted solution means your data stays with you. Full control over your email infrastructure without third-party dependencies.</p>
                 </div>
 
                 <div className="feature-card-modern">
                     <div className="icon-box info">
                         <Globe size={24} />
                     </div>
-                    <h3>Global Reach</h3>
-                    <p>Optimized for high deliverability worldwide, ensuring your emails reach the inbox.</p>
+                    <h3>Open Source</h3>
+                    <p>Fully transparent codebase on GitHub. Contribute, customize, and learn from a production-ready MERN application.</p>
                 </div>
 
                 <div className="feature-card-modern">
                     <div className="icon-box secondary">
                         <Code size={24} />
                     </div>
-                    <h3>Developer First</h3>
-                    <p>Built with the MERN stack for easy extensibility and seamless integration.</p>
+                    <h3>Developer Experience</h3>
+                    <p>Built with modern technologies and best practices. Rich text editor, dark mode, and intuitive UI make email management enjoyable.</p>
+                </div>
+            </div>
+
+            <div className="story-section">
+                <div className="section-header">
+                    <h2>The Story Behind Quick Mail</h2>
+                </div>
+                <div className="story-content">
+                    <p>
+                        Quick Mail started as a personal project to explore the MERN stack while solving a real-world problem.
+                        Many developers need reliable email delivery for their applications but don't want the complexity of
+                        third-party services or the cost of cloud solutions.
+                    </p>
+                    <p>
+                        What began as a simple SMTP wrapper evolved into a full-featured email platform with rich text editing,
+                        real-time tracking, comprehensive analytics, and a UI that rivals commercial products. Every feature
+                        was designed with the developer experience in mind.
+                    </p>
+                    <div className="story-highlights">
+                        <div className="highlight-item">
+                            <Sparkles size={20} className="highlight-icon" />
+                            <span>Premium UI/UX with glassmorphism design</span>
+                        </div>
+                        <div className="highlight-item">
+                            <Zap size={20} className="highlight-icon" />
+                            <span>Built with modern React 19 and Node.js</span>
+                        </div>
+                        <div className="highlight-item">
+                            <Users size={20} className="highlight-icon" />
+                            <span>Community-driven and actively maintained</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div className="connect-section">
-                <h3>Connect With Us</h3>
+                <h3>Connect With the Developer</h3>
                 <div className="social-links-modern">
                     <a href="https://github.com/janak0ff" target="_blank" rel="noopener noreferrer" className="social-btn github">
                         <Github size={20} />
@@ -69,15 +102,28 @@ const AboutUs = () => {
                     </a>
                     <a href="https://www.janakkumarshrestha0.com.np" target="_blank" rel="noopener noreferrer" className="social-btn website">
                         <Globe size={20} />
-                        <span>Website</span>
+                        <span>Portfolio</span>
                         <ExternalLink size={14} className="external-icon" />
+                    </a>
+                </div>
+            </div>
+
+            <div className="contribute-section">
+                <div className="contribute-card">
+                    <h3>Want to Contribute?</h3>
+                    <p>Quick Mail is open source and welcomes contributions from the community. Whether it's bug fixes, new features, or documentation improvements - every contribution matters.</p>
+                    <a href="https://github.com/janak0ff/MERN-gmail-smpt" target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                        View on GitHub <ArrowRight size={18} />
                     </a>
                 </div>
             </div>
 
             <div className="about-footer-modern">
                 <p>
-                    Built with <Heart size={16} className="heart-icon-anim" /> by the <strong>Janak Shrestha</strong>
+                    Built with <Heart size={16} className="heart-icon-anim" /> by <strong>Janak Shrestha</strong>
+                </p>
+                <p className="footer-tagline">
+                    Making email delivery simple, secure, and beautiful
                 </p>
             </div>
         </div>
