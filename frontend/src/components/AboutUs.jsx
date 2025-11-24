@@ -67,10 +67,6 @@ const AboutUs = () => {
                         <Linkedin size={20} />
                         <span>LinkedIn</span>
                     </a>
-                    <a href="https://x.com/devjanak0ff" target="_blank" rel="noopener noreferrer" className="social-btn twitter">
-                        <Twitter size={20} />
-                        <span>Twitter</span>
-                    </a>
                     <a href="https://www.janakkumarshrestha0.com.np" target="_blank" rel="noopener noreferrer" className="social-btn website">
                         <Globe size={20} />
                         <span>Website</span>

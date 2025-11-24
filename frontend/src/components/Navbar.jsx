@@ -25,7 +25,7 @@ const Navbar = ({ activeTab, setActiveTab, onCheckHealth }) => {
                         <div className="brand-icon">
                             <Mail size={22} />
                         </div>
-                        <span className="brand-text">MERN SMTP</span>
+                        <span className="brand-text">Quick Mail</span>
                     </div>
 
                     {/* Desktop Navigation */}

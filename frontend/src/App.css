@@ -2629,13 +2629,22 @@ body {
 }
 
 .mission-section {
-  margin-bottom: 3rem;
-  padding: 2.5rem;
+  margin: 0 auto 3rem auto;
+  padding: 3rem;
   border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
+  max-width: 700px;
+}
+
+[data-theme='dark'] .mission-section {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .mission-section::before {
@@ -2656,27 +2665,29 @@ body {
 }
 
 .mission-content h2 {
-  font-size: 1.75rem;
+  font-size: 2rem;
+  font-weight: 800;
   margin-bottom: 1rem;
   color: var(--text-main);
+  letter-spacing: -0.02em;
 }
 
 .mission-content p {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   color: var(--text-secondary);
-  max-width: 700px;
   line-height: 1.7;
 }
 
 .icon-box {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
   transition: transform 0.3s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .icon-box.primary {
@@ -2778,6 +2789,19 @@ body {
   background: #24292e;
   color: white;
   border-color: #24292e;
+}
+
+.social-btn.x {
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+}
+
+.social-btn.x:hover {
+  background: #333333;
+  border-color: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .social-btn.linkedin:hover {
