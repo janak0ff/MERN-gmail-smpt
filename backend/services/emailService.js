@@ -613,7 +613,7 @@ Best regards,
         validateMx: true,
         validateTypo: true,
         validateDisposable: true,
-        validateSMTP: true,
+        validateSMTP: false,
       });
 
       if (!valid) {
