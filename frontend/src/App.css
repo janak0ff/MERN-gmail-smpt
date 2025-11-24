@@ -1287,6 +1287,26 @@ body {
   }
 }
 
+/* Landing Page Footer */
+.landing-footer {
+  text-align: center;
+  padding: 4rem 0 3rem;
+  margin-top: 2rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.landing-footer p:first-child {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+}
+
+.landing-footer .footer-tagline {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  font-style: italic;
+}
+
 /* Compose Email Styles */
 .compose-wrapper {
   display: flex;

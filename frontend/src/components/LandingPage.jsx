@@ -1,5 +1,5 @@
 import React from 'react';
-import { Send, Shield, Zap, CheckCircle, ArrowRight, Globe, BarChart3, Lock, Mail, Code, Database, FileText, Users, Smartphone, Briefcase, GraduationCap } from 'lucide-react';
+import { Send, Shield, Zap, CheckCircle, ArrowRight, Globe, BarChart3, Lock, Mail, Code, Database, FileText, Users, Smartphone, Briefcase, GraduationCap, Heart } from 'lucide-react';
 
 const LandingPage = ({ onGetStarted }) => {
     return (
@@ -260,6 +260,16 @@ const LandingPage = ({ onGetStarted }) => {
                     </div>
                 </div>
             </section>
+
+            {/* Footer */}
+            <footer className="landing-footer">
+                <p>
+                    Built with <Heart size={16} className="heart-icon-anim" /> by <strong>Janak Shrestha</strong>
+                </p>
+                <p className="footer-tagline">
+                    Making email delivery simple, secure, and beautiful
+                </p>
+            </footer>
         </div>
     );
 };
