@@ -2358,16 +2358,26 @@ body {
   border-radius: 50px;
   position: relative;
   overflow: hidden;
+  display: flex;
 }
 
 .h-bar-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
   height: 100%;
-  border-radius: 50px;
   transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.h-bar-fill:first-child {
+  border-radius: 50px 0 0 50px;
+}
+
+.h-bar-fill:last-child {
+  border-radius: 0 50px 50px 0;
+}
+
+.h-bar-fill:only-child {
+  border-radius: 50px;
 }
 
 .h-bar-fill.primary {

@@ -90,7 +90,7 @@ const EmailStats = ({ stats }) => {
                         <BarChart3 size={20} className="text-secondary" />
                     </div>
                     <div className="status-bars-horizontal">
-                        {/* Processed Bar (Success + Failed) */}
+                        {/* Processed Bar (Success + Failed) with ratio */}
                         <div className="h-bar-item">
                             <div className="h-bar-info">
                                 <div className="h-bar-label">
@@ -100,9 +100,15 @@ const EmailStats = ({ stats }) => {
                                 <span className="h-bar-value">{(stats.byStatus?.sent || 0) + (stats.byStatus?.failed || 0)}</span>
                             </div>
                             <div className="h-bar-track">
+                                {/* Delivered segment */}
                                 <div
-                                    className="h-bar-fill primary"
-                                    style={{ width: `${((stats.byStatus?.sent || 0) + (stats.byStatus?.failed || 0)) / stats.total * 100 || 0}%` }}
+                                    className="h-bar-fill success"
+                                    style={{ width: `${(stats.byStatus?.sent / stats.total * 100) || 0}%` }}
+                                ></div>
+                                {/* Failed segment */}
+                                <div
+                                    className="h-bar-fill danger"
+                                    style={{ width: `${(stats.byStatus?.failed / stats.total * 100) || 0}%` }}
                                 ></div>
                             </div>
                         </div>
