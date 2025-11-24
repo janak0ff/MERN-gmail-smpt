@@ -111,7 +111,7 @@ Before running the application, ensure you have:
 
 ---
 
-## 🚀 Installation \u0026 Setup
+##  Installation \u0026 Setup
 
 ### Option 1: Clone the Repository
 ```bash
@@ -344,7 +344,7 @@ Get details of a specific email by ID.
 
 ---
 
-## 🎨 UI Features
+## UI Features
 
 ### Responsive Breakpoints
 - **Mobile**: < 640px
@@ -410,5 +410,3 @@ If you encounter any issues or have questions:
 - Review the `.env.example` files
 
 ---
-
-**Made with ❤️ by Janak Shrestha**

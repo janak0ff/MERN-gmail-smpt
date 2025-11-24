@@ -2408,8 +2408,27 @@ body {
   background: linear-gradient(90deg, var(--success), #34d399);
 }
 
+/* Add elegant fade with warm neutral tone at the end */
+.h-bar-fill.success:not(:only-child) {
+  background: linear-gradient(90deg,
+      var(--success) 0%,
+      #34d399 75%,
+      #fbbf24 95%,
+      #f59e0b 100%);
+}
+
 .h-bar-fill.danger {
   background: linear-gradient(90deg, var(--danger), #f87171);
+}
+
+/* Add elegant fade with warm neutral tone at the start */
+.h-bar-fill.danger:not(:only-child):not(:first-child) {
+  background: linear-gradient(90deg,
+      #f59e0b 0%,
+      #fbbf24 5%,
+      var(--danger) 25%,
+      #f87171 100%);
+  margin-left: -2px;
 }
 
 .text-primary {
