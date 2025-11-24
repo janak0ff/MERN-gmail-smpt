@@ -11,7 +11,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
 - [Prerequisites](#-prerequisites)
-- [Installation \u0026 Setup](#-installation--setup)
+- [Installation \  Setup](#-installation--setup)
 - [Environment Configuration](#-environment-configuration)
 - [Running the Application](#-running-the-application)
 - [Project Structure](#-project-structure)
@@ -60,7 +60,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - **Smooth Animations**: Polished transitions and micro-interactions
 - **Accessibility**: Keyboard navigation and screen reader support
 
-### Security \u0026 Reliability
+### Security \  Reliability
 - **Email Validation**: Deep validation with MX, typo, and disposable checks
 - **Rate Limiting**: Prevent abuse with configurable request limits
 - **Secure Authentication**: Gmail OAuth2-ready SMTP integration
@@ -87,7 +87,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - **File Upload**: Multer
 
 ### DevOps
-- **Containerization**: Docker \u0026 Docker Compose
+- **Containerization**: Docker \  Docker Compose
 - **Web Server**: Nginx (for production frontend)
 - **Development**: Nodemon, Vite HMR
 
@@ -100,7 +100,7 @@ Before running the application, ensure you have:
 - **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
 - **MongoDB** (Local or Atlas account) - [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 - **Gmail Account** with App Password enabled
-- **Docker \u0026 Docker Compose** (Optional, for containerized deployment)
+- **Docker \  Docker Compose** (Optional, for containerized deployment)
 
 ### Gmail App Password Setup
 1. Go to [Google Account Security](https://myaccount.google.com/security)
@@ -111,7 +111,7 @@ Before running the application, ensure you have:
 
 ---
 
-##  Installation \u0026 Setup
+##  Installation \  Setup
 
 ### Option 1: Clone the Repository
 ```bash
