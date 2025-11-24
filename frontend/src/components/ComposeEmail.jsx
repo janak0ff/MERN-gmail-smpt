@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Send, User, Type, FileCode, PenTool, Paperclip, X } from 'lucide-react';
+import SimpleEditor from './SimpleEditor';
 
 const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFileChange, removeAttachment }) => {
     const [showHtml, setShowHtml] = useState(false);
@@ -45,16 +46,31 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
                         />
                     </div>
 
+
                     <div className="editor-area">
-                        <textarea
-                            name="message"
+                        <SimpleEditor
                             value={formData.message}
-                            onChange={handleChange}
-                            required
-                            placeholder="Write your story..."
-                            className="clean-textarea"
+                            onChange={(content) => {
+                                handleChange({
+                                    target: {
+                                        name: 'message',
+                                        value: content.text
+                                    }
+                                });
+                                // Store HTML content separately if needed
+                                if (content.html !== content.text) {
+                                    handleChange({
+                                        target: {
+                                            name: 'html',
+                                            value: content.html
+                                        }
+                                    });
+                                }
+                            }}
+                            placeholder="Write your message..."
                         />
                     </div>
+
 
                     {formData.attachments && formData.attachments.length > 0 && (
                         <div className="attachments-preview-area">
