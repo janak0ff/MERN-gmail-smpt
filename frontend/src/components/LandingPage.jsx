@@ -23,9 +23,9 @@ const LandingPage = ({ onGetStarted }) => {
                         <button onClick={onGetStarted} className="btn btn-primary btn-xl">
                             Start Sending <ArrowRight size={20} />
                         </button>
-                        <button className="btn btn-glass btn-xl">
+                        <a href="https://github.com/janak0ff/MERN-gmail-smpt" target="_blank" rel="noopener noreferrer" className="btn btn-glass btn-xl">
                             View Documentation
-                        </button>
+                        </a>
                     </div>
 
                     <div className="hero-metrics">
