@@ -6,7 +6,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 - [Use Cases](#-use-cases)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
@@ -20,7 +20,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 
 ---
 
-## 🎯 Use Cases
+## Use Cases
 
 **Quick Mail** is perfect for:
 
@@ -33,34 +33,34 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 
 ---
 
-## ✨ Features
+## Features
 
-### 📧 Email Composition
+### Email Composition
 - **Rich Text Editor**: Format emails with bold, italic, underline, lists, and alignment
 - **HTML Support**: Advanced HTML email composition with live preview
 - **File Attachments**: Upload and send multiple files (up to 10MB per file)
 - **Auto-save Draft**: Preserve your work with automatic content syncing
 
-### 📊 Email Management
+### Email Management
 - **Email History**: Track all sent, failed, and pending emails
 - **Advanced Filtering**: Search by recipient, status, and date range
 - **Detailed View**: See full email content, attachments, and delivery status
 - **Pagination**: Navigate through large email lists efficiently
 
-### 📈 Analytics Dashboard
+### Analytics Dashboard
 - **Delivery Stats**: View success/failure rates and total emails processed
 - **Performance Charts**: Visualize email delivery over time (last 30 days)
 - **Real-time Updates**: Live statistics and status tracking
 - **Export Ready**: Data organized for easy export and reporting
 
-### 🎨 Modern UI/UX
+### Modern UI/UX
 - **Dark Mode**: Eye-friendly dark theme set as default
 - **Glassmorphism Design**: Premium glass-effect cards and components
 - **Fully Responsive**: Optimized for mobile, tablet, and desktop
 - **Smooth Animations**: Polished transitions and micro-interactions
 - **Accessibility**: Keyboard navigation and screen reader support
 
-### 🔒 Security \u0026 Reliability
+### Security \u0026 Reliability
 - **Email Validation**: Deep validation with MX, typo, and disposable checks
 - **Rate Limiting**: Prevent abuse with configurable request limits
 - **Secure Authentication**: Gmail OAuth2-ready SMTP integration
@@ -69,7 +69,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **Framework**: React 19.2 with Vite
@@ -93,7 +93,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 
 ---
 
-## 📦 Prerequisites
+## Prerequisites
 
 Before running the application, ensure you have:
 
@@ -121,7 +121,7 @@ cd MERN-gmail-smpt
 
 ---
 
-## ⚙️ Environment Configuration
+## Environment Configuration
 
 ### Backend Environment Variables
 
@@ -188,7 +188,7 @@ mongodb+srv://myuser:MySecurePassword123@cluster0.ab1cd.mongodb.net/quickmail?re
 
 ---
 
-## 🏃 Running the Application
+## Running the Application
 
 ### Docker Method (Recommended)
 
@@ -209,8 +209,8 @@ docker-compose down
 ```
 
 **Access the application**:
-- 🌐 **Frontend**: [http://localhost:3000](http://localhost:3000)
-- 🔌 **Backend API**: [http://localhost:5000/api/email/health/check](http://localhost:5000/api/email/health/check)
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:5000/api/email/health/check](http://localhost:5000/api/email/health/check)
 
 ---
 
@@ -238,7 +238,7 @@ Frontend will run on: `http://localhost:5173` (or port shown in terminal)
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 MERN-gmail-smpt/
@@ -283,7 +283,7 @@ MERN-gmail-smpt/
 
 ---
 
-## 🔌 API Reference
+## API Reference
 
 ### Email Endpoints
 
@@ -365,7 +365,7 @@ Get details of a specific email by ID.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! To contribute:
 
@@ -377,13 +377,13 @@ Contributions are welcome! To contribute:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License.
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Janak Shrestha**
 
@@ -393,7 +393,7 @@ This project is licensed under the MIT License.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built with the MERN stack
 - UI inspiration from modern glassmorphism design
@@ -402,7 +402,7 @@ This project is licensed under the MIT License.
 
 ---
 
-## 📞 Support
+## Support
 
 If you encounter any issues or have questions:
 - Open an issue on [GitHub](https://github.com/janak0ff/MERN-gmail-smpt/issues)
