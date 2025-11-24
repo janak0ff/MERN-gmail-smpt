@@ -8,7 +8,7 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
         <div className="compose-wrapper fade-in">
             <div className="compose-paper">
                 <div className="compose-header">
-                    <h2>New Message</h2>
+                    <h2>Compose New Message</h2>
                     <div className="window-controls">
                         <span className="control-dot close"></span>
                         <span className="control-dot minimize"></span>

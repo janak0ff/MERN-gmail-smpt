@@ -86,7 +86,7 @@ const EmailStats = ({ stats }) => {
             <div className="charts-section">
                 <div className="chart-card">
                     <div className="chart-header">
-                        <h3>Delivery Performance (Last 30 Days)</h3>
+                        <h3>Delivery Performance</h3>
                         <BarChart3 size={20} className="text-secondary" />
                     </div>
                     <div className="status-bars-horizontal">
