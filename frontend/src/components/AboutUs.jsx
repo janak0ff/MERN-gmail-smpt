@@ -59,19 +59,19 @@ const AboutUs = () => {
             <div className="connect-section">
                 <h3>Connect With Us</h3>
                 <div className="social-links-modern">
-                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="social-btn github">
+                    <a href="https://github.com/janak0ff" target="_blank" rel="noopener noreferrer" className="social-btn github">
                         <Github size={20} />
                         <span>GitHub</span>
                     </a>
-                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-btn linkedin">
+                    <a href="https://www.linkedin.com/in/janakkss/" target="_blank" rel="noopener noreferrer" className="social-btn linkedin">
                         <Linkedin size={20} />
                         <span>LinkedIn</span>
                     </a>
-                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="social-btn twitter">
+                    <a href="https://x.com/devjanak0ff" target="_blank" rel="noopener noreferrer" className="social-btn twitter">
                         <Twitter size={20} />
                         <span>Twitter</span>
                     </a>
-                    <a href="https://example.com" target="_blank" rel="noopener noreferrer" className="social-btn website">
+                    <a href="https://www.janakkumarshrestha0.com.np" target="_blank" rel="noopener noreferrer" className="social-btn website">
                         <Globe size={20} />
                         <span>Website</span>
                         <ExternalLink size={14} className="external-icon" />
@@ -81,7 +81,7 @@ const AboutUs = () => {
 
             <div className="about-footer-modern">
                 <p>
-                    Built with <Heart size={16} className="heart-icon-anim" /> by the <strong>MERN SMTP Team</strong>
+                    Built with <Heart size={16} className="heart-icon-anim" /> by the <strong>Janak Shrestha</strong>
                 </p>
             </div>
         </div>
