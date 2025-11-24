@@ -9,6 +9,14 @@
   <meta name="theme-color" content="#667eea" />
   <meta name="description" content="MERN Stack SMTP Gmail Application - Send emails and track history" />
   <title>MERN SMTP Email App</title>
+  <script>
+    // Prevent flash of light theme - runs before page render
+    (function () {
+      const savedTheme = localStorage.getItem('theme');
+      const theme = savedTheme || 'dark'; // Default to dark
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 </head>
 
 <body>
