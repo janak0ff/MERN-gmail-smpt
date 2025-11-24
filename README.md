@@ -76,7 +76,7 @@ If you prefer to run the application locally on your machine:
     ```
 3.  Start the server:
     ```bash
-    npm start
+    npm run dev
     ```
     The backend will run on `http://localhost:5000`.
 
