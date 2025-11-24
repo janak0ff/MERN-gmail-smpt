@@ -210,7 +210,7 @@ docker-compose down
 
 **Access the application**:
 - 🌐 **Frontend**: [http://localhost:3000](http://localhost:3000)
-- 🔌 **Backend API**: [http://localhost:5000/api](http://localhost:5000/api)
+- 🔌 **Backend API**: [http://localhost:5000/api/email/health/check](http://localhost:5000/api/email/health/check)
 
 ---
 
