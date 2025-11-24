@@ -131,14 +131,23 @@ body {
 }
 
 .navbar-brand:hover {
-  opacity: 0.9;
+  opacity: 1;
+}
+
+.navbar-brand:hover .brand-icon {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+}
+
+.navbar-brand:hover .brand-icon svg {
+  animation: sendEmail 1.5s ease-in-out infinite;
 }
 
 .brand-icon {
   width: 40px;
   height: 40px;
   background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -146,17 +155,63 @@ body {
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .brand-icon::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent);
-  pointer-events: none;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
+  transform: rotate(45deg);
+  animation: shimmer 3s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
+
+@keyframes sendEmail {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+
+  20% {
+    transform: translate(-2px, 2px) scale(0.9);
+  }
+
+  50% {
+    transform: translate(20px, -20px) scale(0.5);
+    opacity: 0;
+  }
+
+  51% {
+    transform: translate(-20px, 20px) scale(0.5);
+    opacity: 0;
+  }
+
+  80% {
+    transform: translate(0, 0) scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
 }
 
 .brand-text {
