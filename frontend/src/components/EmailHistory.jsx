@@ -155,9 +155,6 @@ const EmailHistory = ({
 
                 {pagination.totalPages > 1 && (
                     <div className="pagination-bar">
-                        <span className="pagination-info">
-                            Showing page <strong>{filters.page}</strong> of <strong>{pagination.totalPages}</strong>
-                        </span>
                         <div className="pagination-controls">
                             <button
                                 disabled={filters.page === 1}
@@ -201,6 +198,9 @@ const EmailHistory = ({
                                 <ChevronRight size={16} />
                             </button>
                         </div>
+                        <span className="pagination-info">
+                            Showing page <strong>{filters.page}</strong> of <strong>{pagination.totalPages}</strong>
+                        </span>
                     </div>
                 )}
             </div>

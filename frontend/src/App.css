@@ -2011,7 +2011,7 @@ body {
 
 .history-header-row {
   display: grid;
-  grid-template-columns: 120px 1.5fr 2fr 1fr 80px;
+  grid-template-columns: 110px 1.5fr 3fr 1.2fr 90px;
   padding: 1rem 1.5rem;
   background: var(--bg-main);
   border-radius: var(--radius-md);
@@ -2033,7 +2033,7 @@ body {
 
 .history-row {
   display: grid;
-  grid-template-columns: 120px 1.5fr 2fr 1fr 80px;
+  grid-template-columns: 110px 1.5fr 3fr 1.2fr 90px;
   padding: 1.25rem 1.5rem;
   background: var(--bg-card);
   border-radius: var(--radius-lg);
@@ -2112,93 +2112,130 @@ body {
   }
 
   .history-row {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    padding: 1.75rem;
-    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "status date"
+      "recipient recipient"
+      "subject subject"
+      "actions actions";
+    gap: 0.75rem;
+    padding: 1.25rem;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
     border-radius: var(--radius-lg);
     margin-bottom: 1rem;
+    position: relative;
   }
 
   .h-col {
     padding: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    overflow: visible;
   }
 
-  /* Add labels for mobile */
-  .h-col::before {
-    content: attr(data-label);
-    font-weight: 700;
-    color: var(--primary);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-right: 1rem;
-    opacity: 0.9;
-  }
-
+  /* Status & Date Row */
   .h-col.status {
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.75rem;
-  }
-
-  .h-col.status::before {
-    display: none;
-    /* Status badge is self-explanatory or positioned differently */
-  }
-
-  /* Special positioning for status on mobile */
-  .h-col.status {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    width: auto;
-    border: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .h-col.recipient {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-    order: -1;
-    /* Move to top */
-  }
-
-  .h-col.recipient::before {
-    display: none;
-  }
-
-  .h-col.subject {
-    order: 2;
+    grid-area: status;
+    justify-content: flex-start;
   }
 
   .h-col.date {
-    order: 3;
-    border-top: 1px solid var(--border-color);
-    padding-top: 0.75rem;
-    margin-top: 0.5rem;
+    grid-area: date;
+    text-align: right;
+    justify-self: end;
   }
 
+  .date-wrapper {
+    align-items: flex-end;
+  }
+
+  .date-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .time-sub {
+    font-size: 0.75rem;
+  }
+
+  /* Recipient Row */
+  .h-col.recipient {
+    grid-area: recipient;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .h-col.recipient::before {
+    content: 'To';
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-light);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .h-col.recipient .cell-text {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  /* Subject Row */
+  .h-col.subject {
+    grid-area: subject;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .h-col.subject::before {
+    content: 'Subject';
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-light);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .subject-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .h-col.subject .cell-text {
+    color: var(--text-main);
+    font-size: 0.95rem;
+  }
+
+  /* Actions Row */
   .h-col.actions {
-    position: absolute;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    width: auto;
+    grid-area: actions;
+    justify-content: flex-end;
+    padding-top: 0.5rem;
   }
 
-  .h-col.actions::before {
-    display: none;
+  .btn-icon-glass {
+    width: auto;
+    height: auto;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    background: var(--bg-main);
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .btn-icon-glass::after {
+    content: 'View Details';
+  }
+
+  .btn-icon-glass:hover {
+    transform: none;
   }
 }
 
