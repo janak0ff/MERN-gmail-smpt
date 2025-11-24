@@ -139,8 +139,8 @@ body {
   box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
 }
 
-.navbar-brand:hover .brand-icon svg {
-  animation: sendEmail 1.5s ease-in-out infinite;
+.brand-icon svg {
+  animation: sendEmail 3s ease-in-out infinite;
 }
 
 .brand-icon {
