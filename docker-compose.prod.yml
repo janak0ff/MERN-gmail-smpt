@@ -19,10 +19,6 @@ services:
     # Remove development volumes - no hot reload in production
     volumes:
       - backend-uploads:/app/uploads
-    # Security hardening
-    read_only: true
-    tmpfs:
-      - /tmp
     # Stricter resource limits for production
     deploy:
       resources:
