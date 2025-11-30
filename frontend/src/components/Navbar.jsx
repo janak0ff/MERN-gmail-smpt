@@ -47,7 +47,6 @@ const Navbar = ({ activeTab, setActiveTab, onCheckHealth }) => {
                         <button
                             className="status-indicator"
                             onClick={onCheckHealth}
-                            title="System Status: Online"
                         >
                             <div className="status-dot pulse"></div>
                         </button>

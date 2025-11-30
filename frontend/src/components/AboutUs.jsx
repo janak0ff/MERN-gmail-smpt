@@ -7,7 +7,7 @@ const AboutUs = () => {
             <div className="about-header-modern">
                 <div className="brand-pill">
                     <Mail size={16} />
-                    <span>Quick Mail v1.0</span>
+                    <span>Quick Mail v2.0</span>
                 </div>
                 <h1>Empowering Communication Through Code</h1>
                 <p className="hero-subtitle">
@@ -36,8 +36,8 @@ const AboutUs = () => {
                     <div className="icon-box success">
                         <Shield size={24} />
                     </div>
-                    <h3>Privacy First</h3>
-                    <p>Self-hosted solution means your data stays with you. Ghost Mode enables local-only storage for sensitive communications. Full control over your email infrastructure without third-party dependencies.</p>
+                    <h3>Privacy & Security</h3>
+                    <p>Self-hosted with Ghost Mode for local-only storage. Hardened with read-only filesystems and strict security headers for enterprise-grade protection.</p>
                 </div>
 
                 <div className="feature-card-modern">

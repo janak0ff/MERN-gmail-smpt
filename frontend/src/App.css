@@ -362,7 +362,7 @@ body {
 }
 
 .status-indicator::after {
-  content: 'System Online';
+  content: 'Check system';
   position: absolute;
   top: 120%;
   right: 0;

@@ -2,7 +2,7 @@
 
 A modern, full-stack email delivery application built with the MERN stack (MongoDB, Express, React, Node.js). Send emails with rich text formatting, track delivery history, and analyze email performance—all through a premium, responsive UI.
 
-![Quick Mail](https://img.shields.io/badge/Quick%20Mail-v1.0-blue) ![MERN Stack](https://img.shields.io/badge/Stack-MERN-green) ![License](https://img.shields.io/badge/License-MIT-yellow)
+![Quick Mail](https://img.shields.io/badge/Quick%20Mail-v2.0-blue) ![MERN Stack](https://img.shields.io/badge/Stack-MERN-green) ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ---
 
@@ -197,18 +197,18 @@ mongodb+srv://myuser:MySecurePassword123@cluster0.ab1cd.mongodb.net/quickmail?re
 **Easiest way to run both frontend and backend:**
 
 ```bash
-# Build and start all services
-docker-compose up --build
-
-# Run in detached mode (background)
+# Development
 docker-compose up -d --build
 
-# View logs
-docker-compose logs -f
-
-# Stop all services
-docker-compose down
+# Production (Enhanced Security & Performance)
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
+
+**Production Features:**
+- **Multi-stage Builds**: Optimized images (Backend: ~120MB, Frontend: ~40MB)
+- **Security Hardening**: Read-only filesystem, non-root users, and strict headers
+- **Reliability**: Automatic health checks and resource limits
+- **Performance**: Gzip compression and optimized caching
 
 **Access the application**:
 - **Frontend**: [http://localhost:3000](http://localhost:3000)

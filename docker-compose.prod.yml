@@ -1,0 +1,90 @@
+# =========================================
+# Production Docker Compose Override
+# =========================================
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# This file contains production-specific overrides
+
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      target: production
+      args:
+        NODE_ENV: production
+    container_name: quickmail-backend-prod
+    environment:
+      - NODE_ENV=production
+    # Remove development volumes - no hot reload in production
+    volumes:
+      - backend-uploads:/app/uploads
+    # Security hardening
+    read_only: true
+    tmpfs:
+      - /tmp
+    # Stricter resource limits for production
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    # Production logging with rotation
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+        compress: "true"
+
+  frontend:
+    build:
+      context: ./frontend
+      target: production
+      args:
+        NODE_ENV: production
+    container_name: quickmail-frontend-prod
+    # Remove all volumes - static build served by nginx
+    volumes: []
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+        compress: "true"
+
+volumes:
+  backend-uploads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/quickmail/uploads  # Adjust this path for your server
+
+networks:
+  quickmail-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16

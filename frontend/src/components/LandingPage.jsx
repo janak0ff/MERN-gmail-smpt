@@ -9,7 +9,7 @@ const LandingPage = ({ onGetStarted }) => {
                 <div className="hero-content">
                     <div className="hero-badge">
                         <span className="pulse-dot"></span>
-                        <span>Quick Mail v1.0 - Production Ready</span>
+                        <span>Quick Mail v2.0 - Production Ready</span>
                     </div>
                     <h1 className="hero-title">
                         Modern Email Infrastructure <br />
@@ -182,8 +182,8 @@ const LandingPage = ({ onGetStarted }) => {
                         <div className="feature-icon teal">
                             <Lock size={28} />
                         </div>
-                        <h3>Secure & Reliable</h3>
-                        <p>Rate limiting, Gmail OAuth2 support, and comprehensive error handling for production use.</p>
+                        <h3>Enterprise-Grade Security</h3>
+                        <p>Read-only filesystem, strict security headers, rate limiting, and Gmail OAuth2 support for maximum protection.</p>
                     </div>
 
                     <div className="feature-card">
