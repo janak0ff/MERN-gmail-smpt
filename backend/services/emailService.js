@@ -197,7 +197,10 @@ class EmailService {
   }
 
   formatPlainTextToHTML(text, extraHtml = null, attachments = []) {
-    const formattedText = text
+    // Check if text looks like HTML (contains tags)
+    const isHtml = /<[a-z][\s\S]*>/i.test(text);
+
+    const formattedText = isHtml ? text : text
       .replace(/\r\n/g, '<br>')
       .replace(/\n/g, '<br>')
       .replace(/\r/g, '<br>');
