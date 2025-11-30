@@ -51,21 +51,14 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
                         <SimpleEditor
                             value={formData.message}
                             onChange={(content) => {
+                                // Only update the message field with plain text
+                                // HTML field is managed separately via the "Add HTML Content" toggle
                                 handleChange({
                                     target: {
                                         name: 'message',
                                         value: content.text
                                     }
                                 });
-                                // Store HTML content separately if needed
-                                if (content.html !== content.text) {
-                                    handleChange({
-                                        target: {
-                                            name: 'html',
-                                            value: content.html
-                                        }
-                                    });
-                                }
                             }}
                             placeholder="Write your message..."
                         />

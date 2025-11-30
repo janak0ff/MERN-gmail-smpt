@@ -48,7 +48,17 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
   try {
     console.log('=== Send Email Request ===');
 
-    const { to, subject, message, html } = req.body;
+    let { to, subject, message, html } = req.body;
+
+    // Sanitize 'to' field - remove any HTML tags that might have been accidentally included
+    if (to) {
+      to = to.replace(/<[^>]*>/g, '').trim();
+    }
+
+    console.log('Recipient (sanitized):', to);
+    console.log('Subject:', subject);
+    console.log('Message length:', message?.length);
+    console.log('HTML provided:', !!html);
 
     // Validation
     if (!to || !subject || !message) {
@@ -61,9 +71,10 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
     // Strict Email validation
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(to)) {
+      console.error('Email validation failed for:', to);
       return res.status(400).json({
         success: false,
-        message: 'Invalid email address format'
+        message: `Invalid email address format: ${to}`
       });
     }
 
