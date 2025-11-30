@@ -143,10 +143,10 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
                                 type="button"
                                 className={`btn-ghost-mode ${isGhostMode ? 'active' : ''}`}
                                 onClick={() => setIsGhostMode(!isGhostMode)}
-                                title={isGhostMode ? "Ghost Mode On: Messages saved locally only" : "Enable Ghost Mode"}
+                                title={isGhostMode ? "Messages saved locally in browser only" : "Messages saved locally in browser only"}
                             >
                                 <Ghost size={18} />
-                                <span>{isGhostMode ? 'Ghost Mode On' : 'Ghost Mode'}</span>
+                                <span>{isGhostMode ? 'You are in Ghost Mode' : 'Be in Ghost Mode'}</span>
                             </button>
 
                             <button

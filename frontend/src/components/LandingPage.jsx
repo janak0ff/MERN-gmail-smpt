@@ -155,6 +155,14 @@ const LandingPage = ({ onGetStarted }) => {
                     </div>
 
                     <div className="feature-card">
+                        <div className="feature-icon indigo">
+                            <Lock size={28} />
+                        </div>
+                        <h3>Ghost Mode Privacy</h3>
+                        <p>Enhanced privacy mode stores messages locally in your browser only—no server storage for sensitive communications.</p>
+                    </div>
+
+                    <div className="feature-card">
                         <div className="feature-icon green">
                             <BarChart3 size={28} />
                         </div>
@@ -171,7 +179,7 @@ const LandingPage = ({ onGetStarted }) => {
                     </div>
 
                     <div className="feature-card">
-                        <div className="feature-icon indigo">
+                        <div className="feature-icon teal">
                             <Lock size={28} />
                         </div>
                         <h3>Secure & Reliable</h3>

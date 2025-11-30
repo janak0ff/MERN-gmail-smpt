@@ -832,7 +832,7 @@ body {
   padding: 0 1.5rem;
   height: 56px;
   /* Uniform Height */
-  border-radius: 16px;
+  border-radius: var(--radius-full);
   /* Uniform Radius */
   font-weight: 600;
   font-size: 1rem;
@@ -952,7 +952,6 @@ body {
     gap: 1rem;
   }
 
-  .attach-file-btn,
   .btn-ghost-mode,
   .btn-send-primary {
     width: 100%;
@@ -960,8 +959,12 @@ body {
     justify-content: center;
     padding: 0.75rem 1rem;
     font-size: 1rem;
-    white-space: normal;
-    /* Allow wrapping if needed, though unlikely with full width */
+    white-space: nowrap;
+    /* Ensure text stays on one line */
+    flex-shrink: 0;
+    /* Prevent shrinking */
+    border-radius: 16px;
+    /* Ensure uniform radius on mobile too */
   }
 }
 
@@ -1747,20 +1750,10 @@ body {
   }
 
 
-  /* Elegant Icon-only Attach Button for Mobile */
+  /* Attach Button for Mobile */
   .attach-file-btn {
-    width: 48px;
-    height: 48px;
-    padding: 0;
     justify-content: center;
-    border-radius: 50%;
     flex-shrink: 0;
-    background: var(--bg-card);
-    border-color: var(--border-color);
-  }
-
-  .attach-file-btn span {
-    display: none;
   }
 
   .attach-file-btn:active {

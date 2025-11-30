@@ -39,6 +39,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - **Rich Text Editor**: Format emails with bold, italic, underline, lists, and alignment
 - **HTML Support**: Advanced HTML email composition with live preview
 - **File Attachments**: Upload and send multiple files (up to 10MB per file)
+- **Ghost Mode**: Privacy-first feature that saves messages locally in browser only (no server storage)
 - **Auto-save Draft**: Preserve your work with automatic content syncing
 
 ### Email Management
@@ -64,6 +65,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - **Email Validation**: Deep validation with MX, typo, and disposable checks
 - **Rate Limiting**: Prevent abuse with configurable request limits
 - **Secure Authentication**: Gmail OAuth2-ready SMTP integration
+- **Ghost Mode Privacy**: Optional local-only storage for sensitive communications
 - **Error Handling**: Comprehensive error tracking and user-friendly messages
 - **Data Persistence**: MongoDB with automatic retry logic
 

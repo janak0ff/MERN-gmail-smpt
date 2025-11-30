@@ -37,7 +37,7 @@ const AboutUs = () => {
                         <Shield size={24} />
                     </div>
                     <h3>Privacy First</h3>
-                    <p>Self-hosted solution means your data stays with you. Full control over your email infrastructure without third-party dependencies.</p>
+                    <p>Self-hosted solution means your data stays with you. Ghost Mode enables local-only storage for sensitive communications. Full control over your email infrastructure without third-party dependencies.</p>
                 </div>
 
                 <div className="feature-card-modern">
