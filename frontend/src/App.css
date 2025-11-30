@@ -947,34 +947,22 @@ body {
 
   .action-buttons {
     width: 100%;
-    flex-direction: row;
-    /* Side-by-side on mobile */
-    gap: 0.5rem;
-    /* Reduced gap */
+    flex-direction: column;
+    /* Stack vertically on mobile */
+    gap: 1rem;
   }
 
-  .attach-file-btn {
-    width: 100%;
-  }
-
+  .attach-file-btn,
   .btn-ghost-mode,
   .btn-send-primary {
-    flex: 1;
-    /* Share width equally */
+    width: 100%;
+    /* Full width */
     justify-content: center;
-    padding: 0.75rem 0.5rem;
-    /* Compact horizontal padding */
-    font-size: 0.9rem;
-    /* Slightly smaller text for fit */
-    white-space: nowrap;
-    /* Prevent text wrapping */
-    min-width: 0;
-    /* Allow shrinking below content size if absolutely necessary, though flex:1 usually handles it */
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    white-space: normal;
+    /* Allow wrapping if needed, though unlikely with full width */
   }
-
-  /* Hide the "Ghost Mode On" text on very small screens if needed, 
-     but flex:1 should handle it. 
-     Optional: Adjust icon size or spacing if needed. */
 }
 
 .analytics-header h2 {
