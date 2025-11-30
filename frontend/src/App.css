@@ -799,47 +799,175 @@ body {
   margin-bottom: 2rem;
 }
 
-/* Ghost Mode Styles */
-.btn-ghost-mode {
+/* Compose Footer & Toolbar */
+.compose-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  /* Stack vertically */
+  gap: 1.5rem;
+}
+
+.toolbar-left {
+  width: 100%;
+}
+
+.action-buttons {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: var(--radius-md);
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Common Button Properties for Uniformity */
+.attach-file-btn,
+.btn-ghost-mode,
+.btn-send-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0 1.5rem;
+  height: 56px;
+  /* Uniform Height */
+  border-radius: 16px;
+  /* Uniform Radius */
   font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  /* Full width by default for stacked layout */
+}
+
+/* 1. Attach File Button - Elegant Secondary */
+.attach-file-btn {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(4px);
+}
+
+.attach-file-btn:hover {
+  background: var(--bg-card);
+  color: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 2. Ghost Mode Button - Spooky Premium */
+.btn-ghost-mode {
   border: 1px solid var(--border-color);
   background: var(--bg-card);
   color: var(--text-secondary);
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  /* Share space in row */
 }
 
 .btn-ghost-mode:hover {
   background: var(--bg-main);
   color: var(--text-main);
+  transform: translateY(-2px);
 }
 
 .btn-ghost-mode.active {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   color: white;
   border-color: transparent;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+  animation: ghostPulse 2s infinite;
 }
 
+.btn-ghost-mode.active:hover {
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+}
+
+@keyframes ghostPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(124, 58, 237, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+  }
+}
+
+/* 3. Send Button - Vibrant Primary */
+.btn-send-primary {
+  color: white;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  border: none;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  flex: 1;
+  /* Share space in row */
+}
+
+.btn-send-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+  filter: brightness(1.1);
+}
+
+.btn-send-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Ghost Mode Active State for Send Button */
 .btn-send-primary.ghost-active {
-  background: linear-gradient(135deg, #8b5cf6, #6366f1);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
-.ghost-indicator {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #8b5cf6;
-  margin-left: 0.5rem;
-  background: rgba(139, 92, 246, 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
+.btn-send-primary.ghost-active:hover:not(:disabled) {
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .compose-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .toolbar-left,
+  .action-buttons {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .attach-file-btn,
+  .btn-ghost-mode,
+  .btn-send-primary {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem;
+    /* Larger touch target */
+    font-size: 1rem;
+  }
+
+  /* Order: Send (Top), Ghost (Middle), Attach (Bottom) */
+  .action-buttons {
+    order: 1;
+    flex-direction: column;
+    /* Stack Ghost and Send on mobile */
+  }
+
+  .toolbar-left {
+    order: 2;
+  }
 }
 
 .analytics-header h2 {
