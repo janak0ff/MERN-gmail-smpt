@@ -146,7 +146,11 @@ function App() {
       }
     } catch (error) {
       console.error('Error sending email:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to send email. Please try again.';
+      const serverError = error.response?.data?.error;
+      const serverMessage = error.response?.data?.message;
+      const errorMessage = serverError
+        ? `${serverMessage}: ${serverError}`
+        : (serverMessage || 'Failed to send email. Please try again.');
       toast.error(errorMessage);
     } finally {
       setLoading(false);
