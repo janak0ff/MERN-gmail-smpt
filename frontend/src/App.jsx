@@ -80,8 +80,15 @@ function App() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, isGhostMode = false) => {
     e.preventDefault();
+
+    // Frontend validation
+    if (!formData.to || !formData.subject || !formData.message) {
+      toast.error('Please fill in all required fields (To, Subject, Message)');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -90,6 +97,7 @@ function App() {
       data.append('subject', formData.subject);
       data.append('message', formData.message);
       data.append('html', formData.html);
+      data.append('ghostMode', isGhostMode);
 
       formData.attachments.forEach(file => {
         data.append('attachments', file);
@@ -102,12 +110,36 @@ function App() {
       });
 
       if (response.data.success) {
-        toast.success('Email sent successfully!');
+        toast.success(isGhostMode ? 'Ghost message sent! (Saved locally)' : 'Email sent successfully!');
+
+        // Handle Ghost Mode Local Storage
+        if (isGhostMode) {
+          const ghostEmail = {
+            _id: `ghost-${Date.now()}`,
+            to: formData.to,
+            subject: formData.subject,
+            message: formData.message,
+            html: formData.html,
+            status: 'sent',
+            createdAt: new Date().toISOString(),
+            isGhost: true,
+            attachments: formData.attachments.map(f => ({
+              filename: f.name,
+              size: f.size
+            }))
+          };
+
+          const existingGhosts = JSON.parse(localStorage.getItem('ghost_emails') || '[]');
+          existingGhosts.push(ghostEmail);
+          localStorage.setItem('ghost_emails', JSON.stringify(existingGhosts));
+        }
+
         setFormData({ to: '', subject: '', message: '', html: '', attachments: [] });
 
         // Refresh stats if we're on history tab
         if (activeTab === 'history') {
-          fetchStats();
+          fetchStats(); // Note: Stats won't reflect ghost emails on server
+          fetchEmailHistory(); // Refresh list to show new ghost email
         }
       } else {
         toast.error(`Failed to send email: ${response.data.error}`);
@@ -130,8 +162,47 @@ function App() {
       });
 
       const response = await axios.get(`${API_BASE_URL}/email/history?${params}`);
+
       if (response.data.success) {
-        setEmails(response.data.emails);
+        let serverEmails = response.data.emails;
+
+        // Fetch and process Ghost Emails
+        const ghostEmails = JSON.parse(localStorage.getItem('ghost_emails') || '[]');
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+        // Filter expired ghost emails
+        const validGhostEmails = ghostEmails.filter(email =>
+          new Date(email.createdAt) > threeMonthsAgo
+        );
+
+        // Update storage if we filtered out expired ones
+        if (validGhostEmails.length !== ghostEmails.length) {
+          localStorage.setItem('ghost_emails', JSON.stringify(validGhostEmails));
+        }
+
+        // Apply client-side filtering for ghost emails (basic)
+        const filteredGhostEmails = validGhostEmails.filter(email => {
+          if (filters.recipient && !email.to.toLowerCase().includes(filters.recipient.toLowerCase())) return false;
+          if (filters.status && email.status !== filters.status) return false;
+          if (filters.startDate && new Date(email.createdAt) < new Date(filters.startDate)) return false;
+          if (filters.endDate && new Date(email.createdAt) > new Date(filters.endDate)) return false;
+          return true;
+        });
+
+        // Merge and Sort
+        // Note: Pagination logic here is a bit tricky since we're mixing client/server data
+        // For simplicity, we'll prepend ghost emails to the current page if it's page 1
+        // A full solution would require client-side pagination of the merged list
+
+        let combinedEmails = [...serverEmails];
+        if (filters.page === 1) {
+          combinedEmails = [...filteredGhostEmails, ...serverEmails];
+          // Re-sort by date desc
+          combinedEmails.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+
+        setEmails(combinedEmails);
         setPagination(response.data.pagination);
       }
     } catch (error) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, Search, Calendar, RotateCcw, Paperclip, X, FileCode, Eye } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, Search, Calendar, RotateCcw, Paperclip, X, FileCode, Eye, Ghost } from 'lucide-react';
 
 const EmailHistory = ({
     emails,
@@ -124,6 +124,11 @@ const EmailHistory = ({
                                         <div className="h-col subject" data-label="Subject">
                                             <div className="subject-wrapper">
                                                 <span className="cell-text text-truncate">{email.subject}</span>
+                                                {email.isGhost && (
+                                                    <span className="ghost-indicator" title="Ghost Message (Local Only)">
+                                                        <Ghost size={14} />
+                                                    </span>
+                                                )}
                                                 {email.attachments && email.attachments.length > 0 && (
                                                     <span className="attachment-indicator" title={`${email.attachments.length} attachment(s)`}>
                                                         <Paperclip size={14} />

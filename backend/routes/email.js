@@ -48,7 +48,7 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
   try {
     console.log('=== Send Email Request ===');
 
-    let { to, subject, message, html } = req.body;
+    let { to, subject, message, html, ghostMode } = req.body;
 
     // Sanitize 'to' field - remove any HTML tags that might have been accidentally included
     if (to) {
@@ -94,7 +94,8 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
       subject,
       message,
       html,
-      attachments: req.files // Pass uploaded files
+      attachments: req.files, // Pass uploaded files
+      ghostMode: ghostMode === 'true' || ghostMode === true // Handle both string (multipart) and boolean
     });
 
     if (emailResult.success) {

@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
-import { Send, User, Type, FileCode, PenTool, Paperclip, X } from 'lucide-react';
+import { Send, User, Type, FileCode, PenTool, Paperclip, X, Ghost } from 'lucide-react';
 import SimpleEditor from './SimpleEditor';
 
 const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFileChange, removeAttachment }) => {
     const [showHtml, setShowHtml] = useState(false);
+    const [isGhostMode, setIsGhostMode] = useState(false);
+
+    const onFormSubmit = (e) => {
+        e.preventDefault();
+        handleSubmit(e, isGhostMode);
+    };
 
     return (
         <div className="compose-wrapper fade-in">
@@ -17,7 +23,7 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="compose-form">
+                <form onSubmit={onFormSubmit} className="compose-form">
                     <div className="input-group">
                         <label htmlFor="to">To</label>
                         <input
@@ -130,26 +136,37 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
                                     <span>Attach Files</span>
                                 </label>
                             </div>
-
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn-send-primary"
-                        >
-                            {loading ? (
-                                <>
-                                    <div className="spinner-sm"></div>
-                                    <span>Sending...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <span>Send Message</span>
-                                    <Send size={18} />
-                                </>
-                            )}
-                        </button>
+                        <div className="action-buttons">
+                            <button
+                                type="button"
+                                className={`btn-ghost-mode ${isGhostMode ? 'active' : ''}`}
+                                onClick={() => setIsGhostMode(!isGhostMode)}
+                                title={isGhostMode ? "Ghost Mode On: Messages saved locally only" : "Enable Ghost Mode"}
+                            >
+                                <Ghost size={18} />
+                                <span>{isGhostMode ? 'Ghost Mode On' : 'Ghost Mode'}</span>
+                            </button>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className={`btn-send-primary ${isGhostMode ? 'ghost-active' : ''}`}
+                            >
+                                {loading ? (
+                                    <>
+                                        <div className="spinner-sm"></div>
+                                        <span>Sending...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Send Message</span>
+                                        <Send size={18} />
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

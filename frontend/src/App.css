@@ -799,6 +799,49 @@ body {
   margin-bottom: 2rem;
 }
 
+/* Ghost Mode Styles */
+.btn-ghost-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+
+.btn-ghost-mode:hover {
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+.btn-ghost-mode.active {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-send-primary.ghost-active {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.ghost-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b5cf6;
+  margin-left: 0.5rem;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
 .analytics-header h2 {
   font-size: 1.5rem;
   font-weight: 700;

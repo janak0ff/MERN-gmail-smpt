@@ -101,18 +101,22 @@ class EmailService {
         throw new Error('Missing required fields: to, subject, or message');
       }
 
-      // Create email record in database with pending status
-      emailRecord = new Email({
-        from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
-        to: emailData.to,
-        subject: emailData.subject,
-        message: emailData.message,
-        html: emailData.html,
-        status: 'pending'
-      });
+      // Create email record in database with pending status (SKIP if ghost mode)
+      if (!emailData.ghostMode) {
+        emailRecord = new Email({
+          from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
+          to: emailData.to,
+          subject: emailData.subject,
+          message: emailData.message,
+          html: emailData.html,
+          status: 'pending'
+        });
 
-      await emailRecord.save();
-      console.log(`Email record created with ID: ${emailRecord._id}`);
+        await emailRecord.save();
+        console.log(`Email record created with ID: ${emailRecord._id}`);
+      } else {
+        console.log('👻 Ghost Mode enabled: Skipping database storage');
+      }
 
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -139,7 +143,7 @@ class EmailService {
       };
 
       // Update email record with attachments info if present
-      if (emailData.attachments && emailData.attachments.length > 0) {
+      if (!emailData.ghostMode && emailData.attachments && emailData.attachments.length > 0) {
         emailRecord.attachments = emailData.attachments.map(file => ({
           filename: file.originalname,
           path: file.path,
@@ -156,13 +160,15 @@ class EmailService {
 
       console.log('Email sent successfully. Message ID:', result.messageId);
 
-      // Update record with success
-      await emailRecord.markAsSent(result.messageId);
+      // Update record with success (SKIP if ghost mode)
+      if (emailRecord) {
+        await emailRecord.markAsSent(result.messageId);
+      }
 
       return {
         success: true,
         messageId: result.messageId,
-        emailId: emailRecord._id,
+        emailId: emailRecord ? emailRecord._id : 'ghost-mode',
         message: 'Email sent successfully'
       };
 
