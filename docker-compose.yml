@@ -13,7 +13,7 @@ services:
     environment:
       - NODE_ENV=production
     volumes:
-      - backend-uploads:/app/uploads
+      - ./backend/uploads:/app/uploads
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/email/health/check', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
@@ -70,9 +70,7 @@ services:
     networks:
       - quickmail-network
 
-volumes:
-  backend-uploads:
-    driver: local
+
 
 networks:
   quickmail-network:
