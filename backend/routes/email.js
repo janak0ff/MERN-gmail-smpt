@@ -117,6 +117,22 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
   } catch (error) {
     console.error('Send email error:', error);
     console.error('Error stack:', error.stack);
+
+    // Check for validation errors
+    if (error.message.includes('Invalid email') ||
+      error.message.includes('validation failed') ||
+      error.message.includes('does not exist') ||
+      error.message.includes('Disposable') ||
+      error.message.includes('Domain') ||
+      error.message.includes('mailbox unavailable') ||
+      error.message.includes('SMTP check failed')) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+        error: error.message
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: 'Internal server error',

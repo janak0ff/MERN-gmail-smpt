@@ -615,9 +615,17 @@ Best regards,
   }
 
   async validateEmailDeeply(email) {
+    // Check if deep validation is disabled via environment variable
+    if (process.env.SKIP_DEEP_VALIDATION === 'true') {
+      console.log('Skipping deep email validation (SKIP_DEEP_VALIDATION is set)');
+      return true;
+    }
+
     try {
+      console.log(`Starting deep validation for: ${email}`);
       const { valid, reason, validators } = await emailValidator.validate({
         email: email,
+        sender: process.env.GMAIL_USER || 'janak123g@gmail.com', // Use actual sender to avoid greylisting/blocking
         validateRegex: true,
         validateMx: true,
         validateTypo: true,
@@ -625,7 +633,58 @@ Best regards,
         validateSMTP: true,
       });
 
+      console.log('Validation result:', { valid, reason, validators });
+
       if (!valid) {
+        // Special handling for SMTP errors
+        if (reason === 'smtp') {
+          const smtpReason = validators.smtp?.reason;
+          console.log(`SMTP Validation Reason: ${smtpReason}`);
+
+          // Expanded list of Hard Failures (550, 551, 552, 553, 554)
+          // And specific messages that indicate the user doesn't exist
+          const hardFailurePatterns = [
+            '550', '551', '552', '553', '554',
+            'does not exist',
+            'mailbox unavailable',
+            'mailbox not found',
+            'User unknown',
+            'unknown user',
+            'recipient rejected',
+            'invalid address',
+            'Address not found',
+            'Access denied',
+            'Relay access denied',
+            'No such user',
+            'account is disabled',
+            'account has been disabled'
+          ];
+
+          const isHardFailure = hardFailurePatterns.some(pattern =>
+            smtpReason && smtpReason.toString().toLowerCase().includes(pattern.toLowerCase())
+          );
+
+          if (isHardFailure) {
+            throw new Error(`Email address does not exist or is blocked: ${smtpReason}`);
+          }
+
+          // STRICT MODE: If enabled, treat ANY SMTP failure as invalid
+          // For Gmail/major providers, we should be stricter even without the env var
+          const isMajorProvider = /@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|icloud\.com)$/i.test(email);
+
+          if (process.env.STRICT_EMAIL_VALIDATION === 'true' || isMajorProvider) {
+            // If it's a major provider and we got an SMTP error that wasn't a hard failure (e.g. timeout),
+            // it's risky. But if it's a 250 OK, valid would be true.
+            // If valid is false and reason is smtp, it implies it FAILED.
+            // So we should probably fail here for major providers too.
+            throw new Error(`Email validation failed: ${smtpReason || 'SMTP connection failed'}`);
+          }
+
+          // For other SMTP errors (timeouts, connection refused) in non-strict mode, we FAIL OPEN
+          console.warn(`SMTP validation failed but failing open (soft failure). Reason: "${smtpReason}".`);
+          return true;
+        }
+
         let errorMessage = 'Invalid email address';
 
         if (validators[reason] && validators[reason].reason) {
@@ -636,7 +695,6 @@ Best regards,
             case 'typo': errorMessage = 'Did you mean ' + validators.typo?.reason + '?'; break;
             case 'disposable': errorMessage = 'Disposable email addresses are not allowed'; break;
             case 'mx': errorMessage = 'Domain does not accept email (MX record missing)'; break;
-            case 'smtp': errorMessage = 'Email address does not exist (SMTP check failed)'; break;
             default: errorMessage = `Invalid email: ${reason} `;
           }
         }
@@ -651,12 +709,18 @@ Best regards,
         error.message.startsWith('Invalid email') ||
         error.message.startsWith('Disposable') ||
         error.message.startsWith('Domain') ||
+        error.message.startsWith('Email address does not exist') ||
         error.message.startsWith('Did you mean')) {
         throw error;
       }
 
-      // Log unexpected validation errors but allow sending (fail open) to avoid blocking valid emails due to network issues
+      // Log unexpected validation errors but allow sending (fail open) unless in strict mode
       console.warn('Deep email validation warning:', error.message);
+
+      if (process.env.STRICT_EMAIL_VALIDATION === 'true') {
+        throw new Error(`Email validation failed (Strict Mode): ${error.message}`);
+      }
+
       return true;
     }
   }
