@@ -197,11 +197,8 @@ mongodb+srv://myuser:MySecurePassword123@cluster0.ab1cd.mongodb.net/quickmail?re
 **Easiest way to run both frontend and backend:**
 
 ```bash
-# Development
+# Run the application
 docker-compose up -d --build
-
-# Production (Enhanced Security & Performance)
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
 **Production Features:**

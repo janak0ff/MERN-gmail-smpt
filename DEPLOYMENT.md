@@ -178,10 +178,10 @@ sudo systemctl enable docker
 sudo systemctl status docker
 
 # Build and start containers
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose up -d --build
 
 # If you get permission errors, use sudo
-# sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# sudo docker compose up -d --build
 
 # Check if containers are running
 docker compose ps
@@ -383,7 +383,7 @@ git pull origin main
 
 # Rebuild and restart
 docker compose down
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose up -d --build
 ```
 
 ### Stop Containers
