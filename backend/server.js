@@ -33,13 +33,29 @@ app.use('/api/email', require('./routes/email'));
 
 
 // MongoDB connection with retry logic
+// MongoDB connection with retry logic
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
+    const dbSource = process.env.DB_SOURCE || 'local';
+    let mongoURI = process.env.MONGODB_URI; // Fallback
+
+    if (dbSource === 'cloud') {
+      mongoURI = process.env.MONGODB_URI_CLOUD;
+      console.log('🌐 Connecting to Cloud MongoDB Atlas...');
+    } else {
+      mongoURI = process.env.MONGODB_URI_LOCAL || 'mongodb://localhost:27017/mern_smtp';
+      console.log('🏠 Connecting to Local MongoDB...');
+    }
+
+    if (!mongoURI) {
+      throw new Error(`MongoDB URI not found for source: ${dbSource}`);
+    }
+
+    await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log('MongoDB connected successfully');
+    console.log(`MongoDB connected successfully (${dbSource})`);
   } catch (error) {
     console.error('MongoDB connection error:', error);
     console.log('Retrying connection in 5 seconds...');
