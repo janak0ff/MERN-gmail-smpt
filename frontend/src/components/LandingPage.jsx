@@ -209,7 +209,7 @@ const LandingPage = ({ onGetStarted }) => {
                             <Database size={32} />
                         </div>
                         <h4>MongoDB</h4>
-                        <p>Atlas or local database with retry logic</p>
+                        <p>Flexible: Atlas cloud or local database</p>
                     </div>
 
                     <div className="tech-item">
@@ -240,15 +240,15 @@ const LandingPage = ({ onGetStarted }) => {
                 <div className="tech-features">
                     <div className="tech-feature-item">
                         <CheckCircle size={18} />
-                        <span>Docker ready for instant deployment</span>
+                        <span>Docker & PM2 ready for deployment</span>
                     </div>
                     <div className="tech-feature-item">
                         <CheckCircle size={18} />
-                        <span>TypeScript compatible architecture</span>
+                        <span>Local or cloud MongoDB support</span>
                     </div>
                     <div className="tech-feature-item">
                         <CheckCircle size={18} />
-                        <span>Production-tested and battle-ready</span>
+                        <span>Production-tested and SSL-ready</span>
                     </div>
                 </div>
             </section>

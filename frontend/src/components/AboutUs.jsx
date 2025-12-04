@@ -36,8 +36,8 @@ const AboutUs = () => {
                     <div className="icon-box success">
                         <Shield size={24} />
                     </div>
-                    <h3>Privacy & Security</h3>
-                    <p>Self-hosted with Ghost Mode for local-only storage. Hardened with read-only filesystems and strict security headers for enterprise-grade protection.</p>
+                    <h3>Production-Grade Security</h3>
+                    <p>Enterprise-grade security with Helmet headers, CORS protection, rate limiting (10 emails/15min), and optional Ghost Mode for privacy.</p>
                 </div>
 
                 <div className="feature-card-modern">
@@ -52,8 +52,8 @@ const AboutUs = () => {
                     <div className="icon-box secondary">
                         <Code size={24} />
                     </div>
-                    <h3>Developer Experience</h3>
-                    <p>Built with modern technologies and best practices. Rich text editor, dark mode, and intuitive UI make email management enjoyable.</p>
+                    <h3>Flexible Deployment</h3>
+                    <p>Deploy with Docker or PM2. Switch between local MongoDB and cloud Atlas. SSL-ready with comprehensive deployment guides.</p>
                 </div>
             </div>
 
@@ -75,15 +75,15 @@ const AboutUs = () => {
                     <div className="story-highlights">
                         <div className="highlight-item">
                             <Sparkles size={20} className="highlight-icon" />
-                            <span>Premium UI/UX with glassmorphism design</span>
+                            <span>Docker & PM2 deployment ready</span>
                         </div>
                         <div className="highlight-item">
                             <Zap size={20} className="highlight-icon" />
-                            <span>Built with modern React 19 and Node.js</span>
+                            <span>Flexible MongoDB: local or cloud Atlas</span>
                         </div>
                         <div className="highlight-item">
                             <Users size={20} className="highlight-icon" />
-                            <span>Community-driven and actively maintained</span>
+                            <span>Production-tested with SSL support</span>
                         </div>
                     </div>
                 </div>

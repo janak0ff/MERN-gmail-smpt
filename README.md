@@ -63,11 +63,13 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 
 ### Security \  Reliability
 - **Email Validation**: Deep validation with MX, typo, and disposable checks
-- **Rate Limiting**: Prevent abuse with configurable request limits
+- **Rate Limiting**: Prevent abuse with configurable request limits (10 emails/15 minutes)
 - **Secure Authentication**: Gmail OAuth2-ready SMTP integration
 - **Ghost Mode Privacy**: Optional local-only storage for sensitive communications
 - **Error Handling**: Comprehensive error tracking and user-friendly messages
 - **Data Persistence**: MongoDB with automatic retry logic
+- **Helmet Security**: Advanced HTTP security headers
+- **CORS Protection**: Configurable cross-origin resource sharing
 
 ---
 
@@ -88,10 +90,13 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - **Security**: Helmet, CORS, Express Rate Limit
 - **File Upload**: Multer
 
-### DevOps
-- **Containerization**: Docker \  Docker Compose
-- **Web Server**: Nginx (for production frontend)
-- **Development**: Nodemon, Vite HMR
+### DevOps \  Deployment
+- **Docker Support**: Full containerization with Docker Compose
+- **Flexible Database**: Switch between local MongoDB and cloud Atlas
+- **Production Ready**: Multi-stage builds, health checks, auto-restart
+- **Web Server**: Nginx with SSL support
+- **PM2 Compatible**: Native deployment with process management
+- **Development**: Hot reload with Nodemon and Vite HMR
 
 ---
 
@@ -137,6 +142,7 @@ Create a `.env` file in the `backend` directory:
 # ======================
 PORT=5000
 NODE_ENV=development
+# NODE_ENV=production
 
 # Client URL (Frontend)
 CLIENT_URL=http://localhost:3000
@@ -144,11 +150,18 @@ CLIENT_URL=http://localhost:3000
 # ======================
 # Database Configuration
 # ======================
-# Option 1: MongoDB Atlas (Recommended)
-MONGODB_URI=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/quickmail?retryWrites=true&w=majority
+# Choose database source: 'local' or 'cloud'
+DB_SOURCE=local
+# DB_SOURCE=cloud
 
-# Option 2: Local MongoDB
-# MONGODB_URI=mongodb://localhost:27017/quickmail
+# Local MongoDB (Docker or system installation)
+MONGODB_URI_LOCAL=mongodb://localhost:27017/mern_smtp
+
+# Cloud MongoDB Atlas
+MONGODB_URI_CLOUD=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/mern_smtp?retryWrites=true&w=majority
+
+# Legacy/Fallback MongoDB URI
+MONGODB_URI=mongodb://localhost:27017/mern_smtp
 
 # ======================
 # Email Configuration (Gmail SMTP)
@@ -158,10 +171,37 @@ GMAIL_USER=your-email@gmail.com
 
 # 16-character App Password (NOT your regular Gmail password)
 # Generate at: https://myaccount.google.com/apppasswords
-GMAIL_APP_PASSWORD=abcd efgh ijkl mnop
+GMAIL_APP_PASSWORD=your-app-password
 ```
 
-### MongoDB Atlas Configuration Steps
+### Database Configuration Options
+
+#### Option 1: Local MongoDB (Development)
+
+**Using Docker** (Recommended for local development):
+```bash
+# MongoDB will start automatically with docker-compose
+docker compose up -d
+```
+
+**Using System MongoDB**:
+```bash
+# Install MongoDB locally
+sudo apt install -y mongodb-org  # Ubuntu/Debian
+brew install mongodb-community   # macOS
+
+# Start MongoDB
+sudo systemctl start mongod      # Linux
+brew services start mongodb-community  # macOS
+
+# Set DB_SOURCE in backend/.env
+DB_SOURCE=local
+MONGODB_URI_LOCAL=mongodb://localhost:27017/mern_smtp
+```
+
+#### Option 2: MongoDB Atlas (Production)
+
+**Setup Steps**:
 
 1. **Create a Free Cluster**:
    - Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
@@ -197,19 +237,33 @@ mongodb+srv://myuser:MySecurePassword123@cluster0.ab1cd.mongodb.net/quickmail?re
 **Easiest way to run both frontend and backend:**
 
 ```bash
-# Run the application
-docker-compose up -d --build
+# Start all services
+docker compose up -d
+
+# Check container status
+docker compose ps
+
+# View logs
+docker compose logs -f
 ```
 
-**Production Features:**
-- **Multi-stage Builds**: Optimized images (Backend: ~120MB, Frontend: ~40MB)
-- **Security Hardening**: Read-only filesystem, non-root users, and strict headers
-- **Reliability**: Automatic health checks and resource limits
-- **Performance**: Gzip compression and optimized caching
+**Docker Features:**
+- ✅ **MongoDB Included**: Local MongoDB (port 27017) for development
+- ✅ **Health Checks**: Automatic monitoring for all services
+- ✅ **Auto-Restart**: Containers restart on failure
+- ✅ **Optimized Images**: Multi-stage builds for small footprint
+- ✅ **Volume Persistence**: Email attachments and database data preserved
 
-**Access the application**:
-- **Frontend**: [http://localhost:3000](http://localhost:3000)
-- **Backend API**: [http://localhost:5000/api/email/health/check](http://localhost:5000/api/email/health/check)
+**Services:**
+- **Frontend**: http://localhost:3000 (Nginx on port 80 internally)
+- **Backend API**: http://localhost:5000
+- **MongoDB**: localhost:27017 (accessible from host)
+- **Health Check**: http://localhost:5000/api/email/health
+
+**Stop Services:**
+```bash
+docker compose down
+```
 
 ---
 
@@ -361,6 +415,60 @@ Get details of a specific email by ID.
 - **Glassmorphism Cards**: Backdrop blur with transparency
 - **Smooth Animations**: Custom cubic-bezier transitions
 - **Mobile-First**: Optimized for touch interfaces
+
+---
+
+## 🚀 Production Deployment
+
+Deploy Quick Mail to your own server with Docker or PM2!
+
+**Domain**: https://quickmail.janakkumarshrestha0.com.np
+
+### Deployment Methods
+
+We provide comprehensive guides for two deployment approaches:
+
+#### 1. **Docker Deployment** (Recommended)
+- Containerized environment
+- Automatic health checks
+- Easy scaling and management
+- SSL with Let's Encrypt
+- Nginx reverse proxy
+
+#### 2. **PM2 Native Deployment**
+- Direct Node.js deployment
+- Process management with PM2
+- Static file serving via Nginx
+- Lower resource overhead
+
+### Quick Start
+
+```bash
+# Clone on server
+git clone https://github.com/janak0ff/MERN-gmail-smpt.git
+cd MERN-gmail-smpt
+
+# Configure environment
+cp backend/.env.example backend/.env
+nano backend/.env
+
+# Deploy with Docker
+docker compose up -d
+
+# OR deploy with PM2
+cd backend && npm install
+pm2 start npm --name quickmail-backend -- start
+```
+
+### Full Deployment Guide
+
+📘 **See [DEPLOYMENT.md](./DEPLOYMENT.md)** for complete step-by-step instructions including:
+- Server setup and prerequisites
+- SSL certificate configuration
+- MongoDB Atlas or local setup
+- Nginx configuration
+- Firewall and security
+- Troubleshooting
 
 ---
 
