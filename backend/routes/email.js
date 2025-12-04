@@ -197,6 +197,39 @@ router.get('/stats/summary', async (req, res) => {
   }
 });
 
+// Health check endpoint for Docker
+router.get('/health', async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      status: 'healthy',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      status: 'unhealthy'
+    });
+  }
+});
+
+// Check SMTP connection
+router.get('/health/check', async (req, res) => {
+  try {
+    const isConnected = await emailService.verifyConnection();
+    res.status(200).json({
+      success: true,
+      smtpConnected: isConnected
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      smtpConnected: false,
+      error: error.message
+    });
+  }
+});
+
 // Get specific email by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -218,25 +251,6 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error'
-    });
-  }
-});
-
-
-
-// Check SMTP connection
-router.get('/health/check', async (req, res) => {
-  try {
-    const isConnected = await emailService.verifyConnection();
-    res.status(200).json({
-      success: true,
-      smtpConnected: isConnected
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      smtpConnected: false,
-      error: error.message
     });
   }
 });

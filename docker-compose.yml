@@ -1,0 +1,84 @@
+services:
+  # MongoDB service (optional - only needed if using local DB)
+  mongodb:
+    image: mongo:7.0
+    container_name: mern-smtp-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: mern_smtp
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - mern-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend service
+  backend:
+    env_file:
+      - ./backend/.env
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mern-smtp-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DB_SOURCE=${DB_SOURCE:-local}
+      - MONGODB_URI_LOCAL=mongodb://mongodb:27017/mern_smtp
+      - MONGODB_URI_CLOUD=${MONGODB_URI_CLOUD}
+      - MONGODB_URI=mongodb://mongodb:27017/mern_smtp
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - NODE_ENV=${NODE_ENV:-production}
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:3000}
+    volumes:
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - mern-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/email/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:5000/api}
+    container_name: mern-smtp-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - mern-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  mern-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local

@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+*.md
+uploads/*
+!uploads/.gitkeep
+debug-*.js
+test-*.js
+reproduce_*.js
+.DS_Store
