@@ -34,6 +34,8 @@ services:
       - MONGODB_URI_LOCAL=mongodb://mongodb:27017/mern_smtp
       - MONGODB_URI=mongodb://mongodb:27017/mern_smtp
       - NODE_ENV=production
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
     volumes:
       - ./backend/uploads:/app/uploads
     depends_on:
