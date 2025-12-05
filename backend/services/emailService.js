@@ -133,7 +133,7 @@ class EmailService {
         to: emailData.to,
         subject: emailData.subject,
         text: emailData.message,
-        html: this.formatPlainTextToHTML(emailData.message, emailData.html, emailData.attachments),
+        html: this.formatPlainTextToHTML(emailData.message, emailData.subject, emailData.html, emailData.attachments),
         attachments: (emailData.attachments && emailData.attachments.length > 0)
           ? emailData.attachments.map(file => ({
             filename: file.originalname,
@@ -202,7 +202,7 @@ class EmailService {
     }
   }
 
-  formatPlainTextToHTML(text, extraHtml = null, attachments = []) {
+  formatPlainTextToHTML(text, subject = 'No Subject', extraHtml = null, attachments = []) {
     // Check if text looks like HTML (contains tags)
     const isHtml = /<[a-z][\s\S]*>/i.test(text);
 
@@ -403,8 +403,8 @@ class EmailService {
           <div class="email-wrapper">
               <div class="email-container">
                   <div class="email-header">
-                      <div class="brand-logo">✨ MERN SMTP</div>
-                      <div class="header-subtitle">Secure Email Delivery System</div>
+                      <div class="brand-logo">✨ Hello Sir / Madam</div>
+                      <div class="header-subtitle">Subject: ${subject}</div>
                   </div>
                   
                   <div class="email-body">
@@ -412,18 +412,22 @@ class EmailService {
                           ${formattedText}
                       </div>
                       
+                      <hr>
+
                       ${extraHtml ? `<div class="custom-html-container">${extraHtml}</div>` : ''}
+
+                      <hr>
                       
                       ${attachmentList}
                   </div>
                   
                   <div class="email-footer">
-                      <p class="footer-text">Sent securely via MERN SMTP Application</p>
+                      <p class="footer-text">Sent By Janak Kr Shrestha</p>
                       <p class="footer-text">
-                          <a href="#" class="footer-link">Unsubscribe</a> • 
-                          <a href="#" class="footer-link">Privacy Policy</a>
+                          <a href="https://www.linkedin.com/in/janakkss/" class="footer-link">Linkedin</a> |
+                          <a href="https://www.janakkumarshrestha0.com.np/" class="footer-link">Portfolio</a>
                       </p>
-                      <p class="footer-text">© ${new Date().getFullYear()} MERN SMTP. All rights reserved.</p>
+                      <p class="footer-text">Thank You for your time</p>
                   </div>
               </div>
           </div>
