@@ -4,7 +4,7 @@ services:
     profiles: ["local-db"]
     image: mongo:7.0
     container_name: mern-smtp-mongodb
-    restart: unless-stopped
+    restart: "no"
     environment:
       MONGO_INITDB_DATABASE: mern_smtp
     ports:
@@ -27,7 +27,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: mern-smtp-backend
-    restart: unless-stopped
+    restart: "no"
     ports:
       - "5000:5000"
     environment:
@@ -55,7 +55,7 @@ services:
       args:
         - VITE_API_URL=/api
     container_name: mern-smtp-frontend
-    restart: unless-stopped
+    restart: "no"
     ports:
       - "3000:80"
     depends_on:

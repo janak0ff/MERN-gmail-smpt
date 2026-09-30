@@ -108,6 +108,10 @@ docker compose down -v
 docker compose restart backend
 ```
 
+The Compose services intentionally do not use an automatic restart policy.
+Start the application explicitly when needed; it will not return after a
+system or Docker daemon reboot by itself.
+
 ### Viewing Logs
 
 ```bash

@@ -272,7 +272,7 @@ const LandingPage = ({ onGetStarted }) => {
             {/* Footer */}
             <footer className="landing-footer">
                 <p>
-                    Built with <Heart size={16} className="heart-icon-anim" /> by <strong>Janak Shrestha</strong>
+                    Built with <Heart size={16} className="heart-icon" /> by <strong>Janak Shrestha</strong>
                 </p>
                 <p className="footer-tagline">
                     Making email delivery simple, secure, and beautiful
