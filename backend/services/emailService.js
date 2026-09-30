@@ -136,7 +136,7 @@ class EmailService {
         to: recipients,
         subject: emailData.subject,
         text: this.formatPlainText(emailData.message),
-        html: this.formatPlainTextToHTML(emailData.message, emailData.subject, emailData.html, emailData.attachments),
+        html: this.formatEmailHTML(emailData.message, emailData.subject, emailData.html, emailData.attachments),
         attachments: (emailData.attachments && emailData.attachments.length > 0)
           ? emailData.attachments.map(file => ({
             filename: file.originalname,
@@ -217,7 +217,103 @@ class EmailService {
       .trim();
   }
 
-  formatPlainTextToHTML(text, subject = 'No Subject', extraHtml = null, attachments = []) {
+  escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  formatEmailHTML(text, subject = 'No Subject', extraHtml = null, attachments = []) {
+    const safeSubject = this.escapeHtml(subject);
+    const brandName = this.escapeHtml(process.env.MAIL_FROM_NAME || 'Quick Mail');
+    const senderAddress = this.escapeHtml(process.env.GMAIL_USER || 'your mail service');
+    const isHtml = /<(?:p|div|br|strong|em|b|i|u|ul|ol|li|h[1-6])(?:\s|\/?>)/i.test(text);
+    const formattedText = isHtml
+      ? text
+      : text.split(/\r\n|\r|\n/).map(line => this.escapeHtml(line)).join('<br>');
+    const attachmentList = attachments?.length
+      ? `<div class="attachments">
+          <div class="section-label">Attachments <span>${attachments.length}</span></div>
+          ${attachments.map(file => `
+            <div class="attachment">
+              <div class="attachment-icon">&#128206;</div>
+              <div class="attachment-details">
+                <div class="attachment-name">${this.escapeHtml(file.originalname)}</div>
+                <div class="attachment-size">${(Number(file.size || 0) / 1024).toFixed(1)} KB</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>`
+      : '';
+
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${safeSubject}</title>
+        <style>
+          body { margin: 0; padding: 0; background: #f4f7fb; color: #172033; font-family: Arial, Helvetica, sans-serif; }
+          .wrapper { width: 100%; padding: 32px 12px; background: #f4f7fb; }
+          .container { width: 100%; max-width: 600px; margin: 0 auto; background: #fff; border: 1px solid #e6eaf0; border-radius: 14px; overflow: hidden; }
+          .topbar { padding: 22px 32px; background: #14213d; }
+          .brand { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: .2px; }
+          .brand-mark { display: inline-block; width: 28px; height: 28px; margin-right: 9px; border-radius: 8px; background: #4f7cff; color: #fff; text-align: center; line-height: 28px; font-size: 15px; vertical-align: middle; }
+          .content { padding: 38px 40px 32px; }
+          .eyebrow { margin: 0 0 10px; color: #64748b; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+          h1 { margin: 0 0 26px; color: #14213d; font-size: 26px; line-height: 1.25; font-weight: 700; overflow-wrap: anywhere; }
+          .message { padding: 22px 24px; border: 1px solid #e6eaf0; border-radius: 10px; color: #334155; font-size: 16px; line-height: 1.75; overflow-wrap: anywhere; }
+          .custom-content { margin-top: 22px; padding: 20px; border-left: 3px solid #4f7cff; background: #f7f9fc; color: #334155; overflow-wrap: anywhere; }
+          .attachments { margin-top: 28px; padding-top: 24px; border-top: 1px solid #e6eaf0; }
+          .section-label { margin-bottom: 12px; color: #64748b; font-size: 12px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+          .section-label span { display: inline-block; min-width: 18px; margin-left: 4px; border-radius: 10px; background: #e8efff; color: #315dcc; text-align: center; letter-spacing: 0; }
+          .attachment { display: inline-flex; width: calc(50% - 7px); box-sizing: border-box; align-items: center; margin: 0 10px 10px 0; padding: 10px; border: 1px solid #e6eaf0; border-radius: 8px; vertical-align: top; }
+          .attachment:nth-child(even) { margin-right: 0; }
+          .attachment-icon { margin-right: 9px; font-size: 18px; }
+          .attachment-details { min-width: 0; }
+          .attachment-name { overflow: hidden; color: #334155; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+          .attachment-size { margin-top: 3px; color: #94a3b8; font-size: 11px; }
+          .footer { padding: 20px 32px; border-top: 1px solid #e6eaf0; background: #fafbfc; color: #94a3b8; font-size: 12px; line-height: 1.5; }
+          .footer strong { color: #64748b; }
+          @media only screen and (max-width: 600px) {
+            .wrapper { padding: 0; }
+            .container { border: 0; border-radius: 0; }
+            .topbar { padding: 20px; }
+            .content { padding: 30px 20px 24px; }
+            h1 { font-size: 23px; }
+            .attachment { display: flex; width: 100%; margin-right: 0; }
+            .footer { padding: 18px 20px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="wrapper">
+          <div class="container">
+            <div class="topbar">
+              <div class="brand"><span class="brand-mark">&#9993;</span>${brandName}</div>
+            </div>
+            <div class="content">
+              <p class="eyebrow">A message for you</p>
+              <h1>${safeSubject}</h1>
+              <div class="message">${formattedText}</div>
+              ${extraHtml ? `<div class="custom-content">${extraHtml}</div>` : ''}
+              ${attachmentList}
+            </div>
+            <div class="footer">
+              Sent with <strong>${brandName}</strong> from ${senderAddress}. Please reply to this email to contact the sender.
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  formatLegacyEmailHTML(text, subject = 'No Subject', extraHtml = null, attachments = []) {
     // Check if text looks like HTML (contains tags)
     const isHtml = /<[a-z][\s\S]*>/i.test(text);
 
