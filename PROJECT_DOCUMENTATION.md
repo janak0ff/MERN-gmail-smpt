@@ -213,6 +213,54 @@ sudo docker compose --profile local-db up -d --build
 The Docker frontend is built with `VITE_API_URL=/api`; its Nginx container
 proxies `/api` to the backend service on the Compose network.
 
+### Final local Docker and host Nginx setup
+
+The local production setup uses MongoDB Atlas and separates the application
+from the host Nginx lifecycle:
+
+| Component | Address | Role |
+|---|---|---|
+| Host Nginx | `http://localhost/` | Public entry point and reverse proxy |
+| Docker frontend | `http://localhost:3000` | React production build |
+| Docker backend | `http://localhost:5000` | Express API |
+| MongoDB Atlas | Cloud URI | Active database |
+
+The active database selection in the ignored `backend/.env` is:
+
+```env
+DB_SOURCE=cloud
+MONGODB_URI_CLOUD=mongodb+srv://<user>:<url-encoded-password>@<cluster>/<database>
+```
+
+Host Nginx uses the separate file
+`/etc/nginx/conf.d/mern-gmail-smpt.conf`. It proxies `/` to Docker port 3000
+and `/api/` to Docker port 5000. The main Nginx configuration must include
+`conf.d/*.conf` inside its `http {}` block.
+
+Start and verify the Atlas-backed application:
+
+```bash
+sudo docker compose up -d --build backend frontend
+sudo docker compose ps
+curl http://localhost/api/email/health
+```
+
+Stop only the MERN application while leaving Nginx running:
+
+```bash
+sudo docker compose down
+```
+
+Compose services use `restart: "no"`, so Docker will not start this
+application after a system reboot or Docker daemon restart. To disable this
+application's Nginx route without stopping Nginx:
+
+```bash
+sudo mv /etc/nginx/conf.d/mern-gmail-smpt.conf \
+  /etc/nginx/conf.d/mern-gmail-smpt.conf.disabled
+sudo nginx -t && sudo systemctl reload nginx
+```
+
 ## 7. Docker image design
 
 ### Backend

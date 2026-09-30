@@ -1,4 +1,5 @@
 • Docker:  sudo docker compose up -d --build backend frontend 
+
 • PM2/Nginx:  pm2 start ecosystem.config.cjs , build the frontend, copy  dist , and enable  nginx.cloud.conf .
 
 
@@ -40,3 +41,5 @@ Do not use  down -v  if you want to preserve your local email history.
 
 
 sudo docker compose --profile local-db up -d --build mongodb backend frontend
+
+
