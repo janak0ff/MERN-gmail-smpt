@@ -2,6 +2,8 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 
 const ThemeContext = createContext();
 
+// The hook and provider intentionally share this context module.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }) => {

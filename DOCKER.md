@@ -27,50 +27,46 @@ docker compose version
 
 ### 1. Environment Setup
 
-Copy the example environment file and configure your settings:
+Configure the backend environment file:
 
 ```bash
-cp .env.example .env
+nano backend/.env
 ```
 
-Edit `.env` and fill in your actual values:
+Edit `backend/.env` and fill in your actual values:
 
 ```env
-# Choose database: local or cloud
-DB_SOURCE=local
+# Use MongoDB Atlas for production
+DB_SOURCE=cloud
 
 # If using cloud, add your MongoDB Atlas connection string
 MONGODB_URI_CLOUD=mongodb+srv://username:password@cluster.mongodb.net/database
 
-# Add your Gmail credentials
 GMAIL_USER=your-email@gmail.com
 GMAIL_APP_PASSWORD=your-app-password
+NODE_ENV=production
+CLIENT_URL=http://localhost:3000
 ```
 
 ### 2. Build and Run
 
-**Option A: Using Local MongoDB (Docker)**
+**Option A: Using Cloud MongoDB Atlas (recommended)**
 
 ```bash
-# Build all services
-docker compose build
-
-# Start all services (including MongoDB)
-docker compose up -d
+# Build and start the Atlas-backed production services
+docker compose up -d --build backend frontend
 
 # View logs
 docker compose logs -f
 ```
 
-**Option B: Using Cloud MongoDB Atlas**
+**Option B: Using Local MongoDB (Docker)**
 
 ```bash
-# Edit .env and set:
-# DB_SOURCE=cloud
-# MONGODB_URI_CLOUD=your-atlas-connection-string
+# Set DB_SOURCE=local in backend/.env
 
-# Start only backend and frontend (skip MongoDB)
-docker compose up -d backend frontend
+# Start the optional MongoDB profile and application
+docker compose --profile local-db up -d --build
 ```
 
 ### 3. Access the Application

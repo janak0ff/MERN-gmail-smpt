@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
@@ -30,10 +31,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/email', require('./routes/email'));
 
+let reconnectTimer;
 
-
-// MongoDB connection with retry logic
-// MongoDB connection with retry logic
 const connectDB = async () => {
   try {
     const dbSource = process.env.DB_SOURCE || 'local';
@@ -54,16 +53,28 @@ const connectDB = async () => {
     await mongoose.connect(mongoURI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 10000,
     });
     console.log(`MongoDB connected successfully (${dbSource})`);
   } catch (error) {
-    console.error('MongoDB connection error:', error);
+    console.error('MongoDB connection error:', error.message);
     console.log('Retrying connection in 5 seconds...');
-    setTimeout(connectDB, 5000);
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = undefined;
+      connectDB();
+    }, 5000);
   }
 };
 
 connectDB();
+
+mongoose.connection.on('disconnected', () => {
+  console.error('MongoDB disconnected');
+});
+
+mongoose.connection.on('error', (error) => {
+  console.error('MongoDB connection error:', error.message);
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -84,7 +95,19 @@ app.use('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
 });
+
+const shutdown = async (signal) => {
+  console.log(`${signal} received, shutting down gracefully`);
+  clearTimeout(reconnectTimer);
+  server.close(async () => {
+    await mongoose.connection.close(false);
+    process.exit(0);
+  });
+};
+
+process.once('SIGTERM', () => shutdown('SIGTERM'));
+process.once('SIGINT', () => shutdown('SIGINT'));

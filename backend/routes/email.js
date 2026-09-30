@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose');
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
@@ -205,18 +206,13 @@ router.get('/stats/summary', async (req, res) => {
 
 // Health check endpoint for Docker
 router.get('/health', async (req, res) => {
-  try {
-    res.status(200).json({
-      success: true,
-      status: 'healthy',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      status: 'unhealthy'
-    });
-  }
+  const connected = mongoose.connection.readyState === 1;
+  res.status(connected ? 200 : 503).json({
+    success: connected,
+    status: connected ? 'healthy' : 'unhealthy',
+    database: connected ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Check SMTP connection

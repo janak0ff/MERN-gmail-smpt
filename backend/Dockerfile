@@ -1,27 +1,26 @@
-# Use Node.js 20 Alpine for smaller image size
-FROM node:20-alpine
+# Install production dependencies in an isolated stage.
+FROM node:20-alpine AS dependencies
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
-# Install dependencies
-RUN npm ci --only=production
+# Runtime image excludes npm cache and development dependencies.
+FROM node:20-alpine AS runtime
 
-# Copy application code
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY package*.json ./
 COPY . .
 
-# Create uploads directory
 RUN mkdir -p uploads
 
-# Expose port
 EXPOSE 5000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:5000/api/email/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start the application
 CMD ["npm", "start"]

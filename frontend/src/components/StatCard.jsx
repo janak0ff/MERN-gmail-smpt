@@ -1,10 +1,11 @@
 import React from 'react';
 
-const StatCard = ({ icon: Icon, label, value, className }) => {
+const StatCard = ({ icon, label, value, className }) => {
+    const IconComponent = icon;
     return (
         <div className={`stat-card ${className || ''}`}>
             <div className="stat-icon-wrapper">
-                <Icon size={24} className="stat-icon" />
+                <IconComponent size={24} className="stat-icon" />
             </div>
             <div className="stat-content">
                 <div className="stat-value">{value}</div>
