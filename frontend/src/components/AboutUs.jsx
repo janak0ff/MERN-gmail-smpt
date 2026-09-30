@@ -7,13 +7,13 @@ const AboutUs = () => {
             <div className="about-header-modern">
                 <div className="brand-pill">
                     <Mail size={16} />
-                    <span>Quick Mail v2.0</span>
+                    <span>Quick Mail · Production-ready email workspace</span>
                 </div>
                 <h1>Empowering Communication Through Code</h1>
                 <p className="hero-subtitle">
-                    Quick Mail is a modern email delivery platform built with passion for developers
-                    who value reliability, security, and simplicity. Born from the need for a self-hosted,
-                    transparent email solution with beautiful UI.
+                    Quick Mail is a self-hosted email workspace for teams and developers who need
+                    a clear, secure way to compose, schedule, and track SMTP messages without giving
+                    up operational control.
                 </p>
             </div>
 
@@ -25,8 +25,9 @@ const AboutUs = () => {
                     <h2>Our Mission</h2>
                     <p>
                         To provide developers with a powerful, transparent, and easy-to-use email infrastructure
-                        that puts control back in their hands. We believe in self-hosted solutions that respect
-                        your privacy while delivering enterprise-grade features with a premium user experience.
+                        that puts control back in their hands. The platform combines protected accounts,
+                        user-scoped history, reusable content, queue-backed delivery, and practical
+                        deployment automation in one focused application.
                     </p>
                 </div>
             </div>
@@ -37,15 +38,15 @@ const AboutUs = () => {
                         <Shield size={24} />
                     </div>
                     <h3>Production-Grade Security</h3>
-                    <p>Enterprise-grade security with Helmet headers, CORS protection, rate limiting (10 emails/15min), and optional Ghost Mode for privacy.</p>
+                    <p>Protected sessions, password hashing, verification and reset flows, rate limiting, secure headers, upload controls, and user-scoped data.</p>
                 </div>
 
                 <div className="feature-card-modern">
                     <div className="icon-box info">
                         <Globe size={24} />
                     </div>
-                    <h3>Open Source</h3>
-                    <p>Fully transparent codebase on GitHub. Contribute, customize, and learn from a production-ready MERN application.</p>
+                    <h3>Built for Operations</h3>
+                    <p>Health endpoints, graceful shutdown, structured deployment documentation, and Docker-ready services make the platform easier to operate.</p>
                 </div>
 
                 <div className="feature-card-modern">
@@ -53,7 +54,7 @@ const AboutUs = () => {
                         <Code size={24} />
                     </div>
                     <h3>Flexible Deployment</h3>
-                    <p>Deploy with Docker or PM2. Switch between local MongoDB and cloud Atlas. SSL-ready with comprehensive deployment guides.</p>
+                    <p>Deploy with Docker or PM2, use MongoDB Atlas or local MongoDB, and place host Nginx in front for TLS and reverse proxying.</p>
                 </div>
             </div>
 
@@ -68,22 +69,22 @@ const AboutUs = () => {
                         third-party services or the cost of cloud solutions.
                     </p>
                     <p>
-                        What began as a simple SMTP wrapper evolved into a full-featured email platform with rich text editing,
-                        real-time tracking, comprehensive analytics, and a UI that rivals commercial products. Every feature
-                        was designed with the developer experience in mind.
+                        What began as a simple SMTP wrapper evolved into a full email workspace with rich text composition,
+                        drafts, reusable templates, scheduled delivery, retryable background jobs, searchable history,
+                        analytics, and a responsive interface. Every feature was designed with the developer experience in mind.
                     </p>
                     <div className="story-highlights">
                         <div className="highlight-item">
                             <Sparkles size={20} className="highlight-icon" />
-                            <span>Docker & PM2 deployment ready</span>
+                            <span>Docker, PM2, and host Nginx deployment ready</span>
                         </div>
                         <div className="highlight-item">
                             <Zap size={20} className="highlight-icon" />
-                            <span>Flexible MongoDB: local or cloud Atlas</span>
+                            <span>Redis/BullMQ queue with scheduled delivery and retries</span>
                         </div>
                         <div className="highlight-item">
                             <Users size={20} className="highlight-icon" />
-                            <span>Production-tested with SSL support</span>
+                            <span>GitHub Actions, GHCR publishing, health checks, and rollback workflow</span>
                         </div>
                     </div>
                 </div>

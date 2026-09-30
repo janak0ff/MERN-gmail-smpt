@@ -1,5 +1,5 @@
 import React from 'react';
-import { Send, Shield, Zap, CheckCircle, ArrowRight, Globe, BarChart3, Lock, Mail, Code, Database, FileText, Users, Smartphone, Briefcase, GraduationCap, Heart } from 'lucide-react';
+import { Send, Shield, Zap, CheckCircle, ArrowRight, Globe, BarChart3, Lock, Mail, Code, Database, FileText, Users, Smartphone, Briefcase, GraduationCap, Heart, Clock } from 'lucide-react';
 
 const LandingPage = ({ onGetStarted }) => {
     return (
@@ -9,15 +9,16 @@ const LandingPage = ({ onGetStarted }) => {
                 <div className="hero-content">
                     <div className="hero-badge">
                         <span className="pulse-dot"></span>
-                        <span>Quick Mail v2.0 - Production Ready</span>
+                        <span>Quick Mail - Production-ready email workspace</span>
                     </div>
                     <h1 className="hero-title">
                         Modern Email Infrastructure <br />
                         <span className="gradient-text">Built for Developers</span>
                     </h1>
                     <p className="hero-subtitle">
-                        Professional SMTP email delivery with rich text editing, real-time tracking,
-                        and comprehensive analytics. Self-hosted, secure, and always reliable.
+                        A secure email workspace for composing, scheduling, and tracking messages
+                        through your own SMTP infrastructure. Self-hosted, responsive, and built for
+                        reliable day-to-day delivery.
                     </p>
                     <div className="hero-cta-group">
                         <button onClick={onGetStarted} className="btn btn-primary btn-xl">
@@ -40,8 +41,8 @@ const LandingPage = ({ onGetStarted }) => {
                         </div>
                         <div className="metric-divider"></div>
                         <div className="metric-item">
-                            <span className="metric-value">Real-time</span>
-                            <span className="metric-label">Delivery Tracking</span>
+                            <span className="metric-value">Queue-backed</span>
+                            <span className="metric-label">Scheduled Delivery</span>
                         </div>
                     </div>
                 </div>
@@ -108,24 +109,24 @@ const LandingPage = ({ onGetStarted }) => {
                         <div className="use-case-icon blue">
                             <Mail size={24} />
                         </div>
-                        <h3>Marketing Campaigns</h3>
-                        <p>Send newsletters and promotional content with rich formatting and attachment support.</p>
+                        <h3>Team Communication</h3>
+                        <p>Prepare announcements and updates with reusable templates, attachments, and a dependable delivery queue.</p>
                     </div>
 
                     <div className="use-case-card">
                         <div className="use-case-icon green">
                             <Users size={24} />
                         </div>
-                        <h3>Customer Communication</h3>
-                        <p>Professional email delivery for support tickets, announcements, and updates.</p>
+                        <h3>Transactional Workflows</h3>
+                        <p>Send account notifications, support replies, and operational messages from a protected workspace.</p>
                     </div>
 
                     <div className="use-case-card">
                         <div className="use-case-icon orange">
                             <GraduationCap size={24} />
                         </div>
-                        <h3>Learning & Development</h3>
-                        <p>Perfect for exploring MERN stack with a production-ready, modern application.</p>
+                        <h3>Developer Platform</h3>
+                        <p>Explore a production-oriented MERN application with Docker, Redis, BullMQ, and automated delivery.</p>
                     </div>
                 </div>
             </section>
@@ -150,40 +151,40 @@ const LandingPage = ({ onGetStarted }) => {
                         <div className="feature-icon purple">
                             <Shield size={28} />
                         </div>
-                        <h3>Email Validation</h3>
-                        <p>Deep validation with MX checks, typo detection, and disposable email filtering for reliable delivery.</p>
+                        <h3>Reliable Delivery Queue</h3>
+                        <p>Queue scheduled messages with Redis and BullMQ, retry transient failures, and track delivery status in your history.</p>
                     </div>
 
                     <div className="feature-card">
                         <div className="feature-icon indigo">
                             <Lock size={28} />
                         </div>
-                        <h3>Ghost Mode Privacy</h3>
-                        <p>Enhanced privacy mode stores messages locally in your browser only—no server storage for sensitive communications.</p>
+                        <h3>Account Security</h3>
+                        <p>Use protected sessions, password hashing, verification and reset flows, rate limiting, and user-scoped email data.</p>
                     </div>
 
                     <div className="feature-card">
                         <div className="feature-icon green">
                             <BarChart3 size={28} />
                         </div>
-                        <h3>Real-time Analytics</h3>
-                        <p>Track delivery rates, monitor performance, and view detailed statistics with visual charts.</p>
+                        <h3>Delivery Analytics</h3>
+                        <p>Review delivery totals and status trends with searchable, paginated history and export support.</p>
                     </div>
 
                     <div className="feature-card">
                         <div className="feature-icon orange">
                             <Globe size={28} />
                         </div>
-                        <h3>Email History</h3>
-                        <p>Complete tracking with advanced filtering by status, recipient, and date range. Full audit trail.</p>
+                        <h3>Drafts & Templates</h3>
+                        <p>Autosave work in progress and reuse message templates to compose consistent emails faster.</p>
                     </div>
 
                     <div className="feature-card">
                         <div className="feature-icon teal">
-                            <Lock size={28} />
+                            <Shield size={28} />
                         </div>
-                        <h3>Enterprise-Grade Security</h3>
-                        <p>Read-only filesystem, strict security headers, rate limiting, and Gmail OAuth2 support for maximum protection.</p>
+                        <h3>Production Operations</h3>
+                        <p>Run non-root containers behind Nginx with security headers, upload limits, health checks, and graceful shutdown.</p>
                     </div>
 
                     <div className="feature-card">
@@ -193,6 +194,13 @@ const LandingPage = ({ onGetStarted }) => {
                         <h3>Fully Responsive</h3>
                         <p>Optimized for mobile, tablet, and desktop with dark mode and glassmorphism design.</p>
                     </div>
+                    <div className="feature-card">
+                        <div className="feature-icon indigo">
+                            <Clock size={28} />
+                        </div>
+                        <h3>Schedule with Confidence</h3>
+                        <p>Schedule messages for later, cancel pending jobs, and let the worker process retries independently from the API.</p>
+                    </div>
                 </div>
             </section>
 
@@ -200,7 +208,7 @@ const LandingPage = ({ onGetStarted }) => {
             <section className="tech-stack-section">
                 <div className="section-header">
                     <h2>Built with Modern Technologies</h2>
-                    <p>Industry-standard MERN stack with premium UI/UX</p>
+                    <p>A maintainable stack with local development and production deployment paths</p>
                 </div>
 
                 <div className="tech-stack-grid">
@@ -233,14 +241,14 @@ const LandingPage = ({ onGetStarted }) => {
                             <Zap size={32} />
                         </div>
                         <h4>Node.js</h4>
-                        <p>Nodemailer with Gmail SMTP</p>
+                        <p>Nodemailer, Redis, and BullMQ worker</p>
                     </div>
                 </div>
 
                 <div className="tech-features">
                     <div className="tech-feature-item">
                         <CheckCircle size={18} />
-                        <span>Docker & PM2 ready for deployment</span>
+                        <span>Docker, PM2, and host Nginx deployment options</span>
                     </div>
                     <div className="tech-feature-item">
                         <CheckCircle size={18} />
@@ -248,7 +256,7 @@ const LandingPage = ({ onGetStarted }) => {
                     </div>
                     <div className="tech-feature-item">
                         <CheckCircle size={18} />
-                        <span>Production-tested and SSL-ready</span>
+                        <span>GitHub Actions CI/CD with GHCR image delivery</span>
                     </div>
                 </div>
             </section>
