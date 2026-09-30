@@ -78,7 +78,7 @@ sudo docker compose --profile local-db up -d --build
 
 ## Docker Compose Services
 
-The application consists of three services:
+The application consists of five services:
 
 1. **mongodb** - MongoDB 7.0 database (optional)
    - Port: 27017
@@ -90,6 +90,14 @@ The application consists of three services:
 
 3. **frontend** - React/Vite app served by Nginx
    - Port: 3000 (mapped to container port 80)
+
+4. **redis** - Redis queue storage for BullMQ
+   - Port: 6379 (loopback only)
+   - Data persisted in Docker volume `redis_data`
+
+5. **worker** - BullMQ email delivery worker
+   - No public port
+   - Consumes direct retry and scheduled-delivery jobs
 
 ## Useful Commands
 
@@ -183,6 +191,8 @@ docker compose logs -f
 docker compose logs -f backend
 docker compose logs -f frontend
 docker compose logs -f mongodb
+docker compose logs -f worker
+docker compose logs -f redis
 ```
 
 ### Rebuilding Images

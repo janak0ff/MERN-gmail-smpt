@@ -13,6 +13,8 @@ import AboutUs from './components/AboutUs';
 import LandingPage from './components/LandingPage';
 import { ThemeProvider } from './context/ThemeContext';
 import AuthPage from './components/AuthPage';
+import Workspace from './components/Workspace';
+import ChangePassword from './components/ChangePassword';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -34,20 +36,40 @@ function App() {
   const [filters, setFilters] = useState({
     status: '',
     recipient: '',
+    q: '',
     startDate: '',
     endDate: '',
     page: 1,
     limit: 10
   });
+  const [draftId, setDraftId] = useState(null);
+  const [autosaveState, setAutosaveState] = useState('');
 
   useEffect(() => {
-    if (!localStorage.getItem('auth_token')) {
-      setAuthChecking(false);
-      return;
-    }
+    if (activeTab !== 'compose' || !Object.entries(formData).some(([key, value]) => key !== 'attachments' && value.trim())) return undefined;
+    const timer = setTimeout(async () => {
+      try {
+        setAutosaveState('Saving…');
+        const response = await api.post('/drafts/autosave', {
+          to: formData.to,
+          subject: formData.subject,
+          message: formData.message,
+          html: formData.html,
+          draftId
+        });
+        setDraftId(response.data.draft._id);
+        setAutosaveState('Saved');
+      } catch {
+        setAutosaveState('Save failed');
+      }
+    }, 900);
+    return () => clearTimeout(timer);
+  }, [activeTab, formData, draftId]);
+
+  useEffect(() => {
     api.get('/auth/me')
       .then(response => setUser(response.data.user))
-      .catch(() => localStorage.removeItem('auth_token'))
+      .catch(() => {})
       .finally(() => setAuthChecking(false));
   }, []);
 
@@ -155,6 +177,10 @@ function App() {
         }
 
         setFormData({ to: '', subject: '', message: '', html: '', attachments: [] });
+        if (draftId) {
+          api.delete(`/drafts/${draftId}`).catch(() => {});
+          setDraftId(null);
+        }
 
         // Refresh stats if we're on history tab
         if (activeTab === 'history') {
@@ -272,11 +298,46 @@ function App() {
     setFilters({
       status: '',
       recipient: '',
+      q: '',
       startDate: '',
       endDate: '',
       page: 1,
       limit: 10
     });
+  };
+
+  const openDraft = (draft) => {
+    setFormData({ to: draft.to || '', subject: draft.subject || '', message: draft.message || '', html: draft.html || '', attachments: [] });
+    setDraftId(draft._id);
+    setActiveTab('compose');
+  };
+
+  const applyTemplate = (template) => {
+    setFormData(prev => ({ ...prev, subject: template.subject || prev.subject, message: template.message || '', html: template.html || '' }));
+    setActiveTab('compose');
+  };
+
+  const exportHistory = async () => {
+    try {
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => { if (value && key !== 'page' && key !== 'limit') params.set(key, value); });
+      const response = await api.get(`/email/history/export.csv?${params}`, { responseType: 'blob' });
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'email-history.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch { toast.error('Unable to export history'); }
+  };
+
+  const deleteEmail = async (email) => {
+    if (email.isGhost || !window.confirm('Delete this history entry?')) return;
+    try {
+      await api.delete(`/email/history/${email._id}`);
+      fetchEmailHistory();
+      toast.success('History entry deleted');
+    } catch { toast.error('Unable to delete history entry'); }
   };
 
   const getStatusIcon = (status) => {
@@ -311,8 +372,8 @@ function App() {
     );
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('auth_token');
+  const handleLogout = async () => {
+    await api.post('/auth/logout').catch(() => {});
     setUser(null);
     setActiveTab('home');
   };
@@ -338,6 +399,7 @@ function App() {
             removeAttachment={removeAttachment}
             handleSubmit={handleSubmit}
             loading={loading}
+            autosaveState={autosaveState}
           />
         )}
 
@@ -352,6 +414,8 @@ function App() {
             handlePageChange={handlePageChange}
             onRefresh={fetchEmailHistory}
             getStatusIcon={getStatusIcon}
+            onExport={exportHistory}
+            onDelete={deleteEmail}
           />
         )}
 
@@ -359,9 +423,14 @@ function App() {
           <EmailStats stats={stats} loading={statsLoading} />
         )}
 
+        {activeTab === 'library' && (
+          <Workspace onLoadDraft={openDraft} onApplyTemplate={applyTemplate} />
+        )}
+
         {activeTab === 'about' && (
           <AboutUs />
         )}
+        {activeTab === 'security' && <ChangePassword />}
       </Layout>
 
       <ToastContainer

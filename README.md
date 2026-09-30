@@ -27,6 +27,13 @@ See [PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md) for the authoritative
 setup, environment, Docker, Nginx, production operations, API, troubleshooting,
 and deployment checklist.
 
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the system architecture,
+service topology, Mermaid diagrams, request flows, data model, and recovery
+guidance.
+
+See [DEVOPS.md](./DEVOPS.md) for GitHub Actions CI/CD, GHCR image publishing,
+protected production deployment, server bootstrap, rollback, and operations.
+
 ---
 
 ## Use Cases

@@ -2,6 +2,8 @@
 
 This document is the authoritative guide for the current Quick Mail implementation,
 local development setup, Docker deployment, production hardening, and operations.
+See `ARCHITECTURE.md` for system diagrams, request flows, service boundaries,
+data relationships, and deployment topology.
 
 ## 1. Product overview
 
@@ -13,6 +15,7 @@ Quick Mail is a MERN email delivery application:
 - Nodemailer with Gmail SMTP/App Password.
 - Nginx for production static hosting and API reverse proxying.
 - Docker Compose for containerized production deployment.
+- Redis/BullMQ for durable queued and scheduled email delivery.
 
 The application supports rich-text email composition, multiple recipients,
 attachments, delivery history, statistics, filtering, dark mode, and Ghost Mode.
@@ -25,9 +28,17 @@ its local history in `localStorage`.
 .
 ├── backend/
 │   ├── models/Email.js             MongoDB email schema
-│   ├── routes/email.js             Send, history, stats, health routes
+│   ├── models/User.js              Account and password metadata
+│   ├── models/Draft.js             User-owned drafts
+│   ├── models/EmailTemplate.js     User-owned reusable templates
+│   ├── routes/auth.js              Registration and account security
+│   ├── routes/email.js             Send, history, stats, scheduling, health
+│   ├── routes/drafts.js            Draft CRUD and autosave
+│   ├── routes/templates.js         Template CRUD
 │   ├── services/emailService.js    SMTP, formatting, persistence, statistics
 │   ├── server.js                   Express startup and MongoDB lifecycle
+│   ├── queue/emailQueue.js         BullMQ queue connection
+│   ├── workers/emailWorker.js      Scheduled delivery worker
 │   ├── Dockerfile                  Multi-stage production image
 │   ├── .dockerignore
 │   ├── .env                        Local secret configuration; ignored by Git
@@ -39,6 +50,9 @@ its local history in `localStorage`.
 │   ├── .env                        Development API URL
 │   └── .env.production             Production same-origin API URL
 ├── docker-compose.yml              Backend + frontend + optional MongoDB
+├── ARCHITECTURE.md                 Mermaid architecture and request flows
+├── backend/queue/emailQueue.js     BullMQ queue connection and defaults
+├── backend/workers/emailWorker.js  Separate email delivery worker
 ├── nginx.local.conf                Host Nginx localhost production config
 ├── nginx.cloud.conf                Host Nginx cloud/domain template
 ├── ecosystem.config.cjs            PM2 production process definition
@@ -80,6 +94,11 @@ DB_SOURCE=cloud
 MONGODB_URI_CLOUD=mongodb+srv://<user>:<url-encoded-password>@<cluster>/<database>?retryWrites=true&w=majority&appName=<app>
 GMAIL_USER=<gmail-address>
 GMAIL_APP_PASSWORD=<gmail-app-password>
+REDIS_URL=redis://redis:6379
+EMAIL_QUEUE_NAME=email-delivery
+QUEUE_CONCURRENCY=2
+QUEUE_MAX_ATTEMPTS=5
+QUEUE_BACKOFF_MS=5000
 CLIENT_URL=http://localhost:3000
 ```
 
@@ -177,6 +196,44 @@ curl http://localhost/api/email/health
 ## 6. Running with Docker Compose
 
 The recommended local production deployment uses MongoDB Atlas:
+
+### Queue operations
+
+Redis is included in Compose and has a healthcheck. The API enqueues scheduled
+messages; the separate worker consumes them, retries transient failures with
+exponential backoff, and removes attachment files after completion or the final
+failed attempt.
+
+Start the application, Redis, and worker:
+
+```bash
+docker compose up -d --build redis backend worker frontend
+docker compose ps
+docker compose logs -f worker
+```
+
+Stop the stack without deleting queue data:
+
+```bash
+docker compose stop
+```
+
+Stop and remove containers (named Redis/MongoDB volumes remain):
+
+```bash
+docker compose down
+```
+
+To remove persisted Redis queue data as well, use:
+
+```bash
+docker compose down -v
+```
+
+Schedule an authenticated message with `POST /api/email/schedule` using the
+same multipart fields as `/api/email/send` plus an ISO-8601 `scheduledAt`.
+Cancel it with `DELETE /api/email/scheduled/:id`; both operations are scoped to
+the authenticated user.
 
 ```bash
 sudo docker compose up -d --build backend frontend
@@ -336,10 +393,19 @@ Base URL: `/api/email`
 |---|---|---|
 | `POST` | `/send` | Send an email with optional attachments |
 | `GET` | `/history` | Paginated, filtered email history |
+| `GET` | `/history/export.csv` | Authenticated CSV export using the same filters |
+| `DELETE` | `/history/:id` | Delete one history entry owned by the current user |
 | `GET` | `/stats/summary` | Delivery statistics |
 | `GET` | `/health` | Backend and MongoDB readiness |
 | `GET` | `/health/check` | SMTP connectivity check |
 | `GET` | `/:id` | Fetch one stored email |
+
+Additional authenticated bases:
+
+- `/api/templates`: user-scoped template list, create, update, and delete.
+- `/api/drafts`: user-scoped draft CRUD plus `POST /autosave` for debounced compose saves.
+- History queries are limited to `EMAIL_RETENTION_DAYS` (90 days by default), clamp future dates,
+  and safely escape search expressions.
 
 Example health response:
 
@@ -403,6 +469,11 @@ For better deliverability:
 - [x] Docker Compose Atlas deployment supported.
 - [x] Optional local MongoDB profile available.
 - [x] Nginx host and container configurations available.
+- [x] Multi-user authentication and account recovery available.
+- [x] Sanitized custom HTML email content.
+- [x] Redis/BullMQ scheduled delivery and retry worker.
+- [x] User-scoped drafts, templates, search, export, and deletion.
+- [x] CI validation workflow available.
 - [x] Backend readiness and graceful shutdown implemented.
 - [x] Frontend lint and production build passing.
 - [ ] Rotate any credentials exposed during setup.

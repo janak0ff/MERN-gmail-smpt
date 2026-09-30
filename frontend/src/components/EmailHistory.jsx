@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Mail, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, Search, Calendar, RotateCcw, Paperclip, X, FileCode, Eye, Ghost } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, Search, Calendar, RotateCcw, Paperclip, X, FileCode, Eye, Ghost, Download, Trash2 } from 'lucide-react';
 
 const EmailHistory = ({
     emails,
@@ -8,7 +8,9 @@ const EmailHistory = ({
     clearFilters,
     pagination,
     handlePageChange,
-    getStatusIcon
+    getStatusIcon,
+    onExport,
+    onDelete
 }) => {
     const [selectedEmail, setSelectedEmail] = useState(null);
 
@@ -49,6 +51,11 @@ const EmailHistory = ({
                             className="filter-input"
                         />
                     </div>
+                    <div className="filter-item search-filter">
+                        <Search size={18} className="filter-icon" />
+                        <input type="text" name="q" value={filters.q} onChange={handleFilterChange} placeholder="Search subject or message..." className="filter-input" />
+                    </div>
+                    <button onClick={onExport} className="btn btn-secondary"><Download size={16} /> Export CSV</button>
 
                     <div className="filter-item">
                         <select
@@ -154,6 +161,9 @@ const EmailHistory = ({
                                                 onClick={() => openEmailDetails(email)}
                                             >
                                                 <Eye size={16} />
+                                            </button>
+                                            <button className="btn-icon-glass" title="Delete" onClick={() => onDelete(email)}>
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
                                     </div>

@@ -1,10 +1,18 @@
 const nodemailer = require('nodemailer');
+const sanitizeHtml = require('sanitize-html');
 const Email = require('../models/Email');
 
 class EmailService {
   constructor() {
     this.transporter = null;
     this.initializeTransporter();
+  }
+
+  async sendTransactionalEmail(to, subject, text) {
+    return this.transporter.sendMail({
+      from: { name: process.env.MAIL_FROM_NAME || 'Quick Mail', address: process.env.GMAIL_USER || 'noreply@example.com' },
+      to, subject, text, html: `<p>${text.replace(/\n/g, '<br>')}</p>`
+    });
   }
 
   initializeTransporter() {
@@ -95,20 +103,30 @@ class EmailService {
     let emailRecord;
 
     try {
+      const sanitizedHtml = this.sanitizeCustomHtml(emailData.html);
       // Validate required fields
       if (!emailData.to || !emailData.subject || !emailData.message) {
         throw new Error('Missing required fields: to, subject, or message');
       }
 
-      // Create email record in database with pending status (SKIP if ghost mode)
-      if (!emailData.ghostMode) {
+      // Reuse a queued record when a worker processes a scheduled job.
+      if (emailData.emailId) {
+        emailRecord = await Email.findOne({ _id: emailData.emailId, user: emailData.userId });
+        if (!emailRecord) throw new Error('Queued email record was not found');
+        if (emailRecord.status === 'canceled') {
+          return { success: true, canceled: true, emailId: emailRecord._id };
+        }
+        emailRecord.status = 'pending';
+        emailRecord.error = null;
+        await emailRecord.save();
+      } else if (!emailData.ghostMode) {
         emailRecord = new Email({
           user: emailData.userId,
           from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
           to: Array.isArray(emailData.to) ? emailData.to.join(', ') : emailData.to,
           subject: emailData.subject,
           message: emailData.message,
-          html: emailData.html,
+          html: sanitizedHtml,
           status: 'pending'
         });
 
@@ -137,7 +155,7 @@ class EmailService {
         to: recipients,
         subject: emailData.subject,
         text: this.formatPlainText(emailData.message),
-        html: this.formatEmailHTML(emailData.message, emailData.subject, emailData.html, emailData.attachments),
+        html: this.formatEmailHTML(emailData.message, emailData.subject, sanitizedHtml, emailData.attachments),
         attachments: (emailData.attachments && emailData.attachments.length > 0)
           ? emailData.attachments.map(file => ({
             filename: file.originalname,
@@ -227,6 +245,20 @@ class EmailService {
       .replace(/'/g, '&#039;');
   }
 
+  sanitizeCustomHtml(html) {
+    return sanitizeHtml(String(html || ''), {
+      allowedTags: [
+        'a', 'b', 'blockquote', 'br', 'code', 'em', 'i', 'li', 'ol',
+        'p', 'pre', 'strong', 'u', 'ul'
+      ],
+      allowedAttributes: {
+        a: ['href', 'target', 'rel', 'title']
+      },
+      allowedSchemes: ['http', 'https', 'mailto'],
+      allowProtocolRelative: false
+    });
+  }
+
   formatEmailHTML(text, subject = 'No Subject', extraHtml = null, attachments = []) {
     const safeSubject = this.escapeHtml(subject);
     const brandName = this.escapeHtml(process.env.MAIL_FROM_NAME || 'Quick Mail');
@@ -235,6 +267,7 @@ class EmailService {
     const formattedText = isHtml
       ? text
       : text.split(/\r\n|\r|\n/).map(line => this.escapeHtml(line)).join('<br>');
+    const safeExtraHtml = this.sanitizeCustomHtml(extraHtml);
     const attachmentList = attachments?.length
       ? `<div class="attachments">
           <div class="section-label">Attachments <span>${attachments.length}</span></div>
@@ -301,7 +334,7 @@ class EmailService {
               <p class="eyebrow">A message for you</p>
               <h1>${safeSubject}</h1>
               <div class="message">${formattedText}</div>
-              ${extraHtml ? `<div class="custom-content">${extraHtml}</div>` : ''}
+              ${safeExtraHtml ? `<div class="custom-content">${safeExtraHtml}</div>` : ''}
               ${attachmentList}
             </div>
             <div class="footer">
@@ -549,6 +582,7 @@ class EmailService {
         limit = 10,
         status,
         recipient,
+        q,
         startDate,
         endDate,
         sortBy = 'createdAt',
@@ -558,25 +592,35 @@ class EmailService {
       // Build query
       const query = { user: filters.userId };
 
-      if (status && status !== 'all') query.status = status;
-      if (recipient) {
-        const escapedRecipient = recipient.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        query.to = { $regex: escapedRecipient, $options: 'i' };
+      if (status && ['sent', 'failed', 'pending', 'scheduled', 'canceled'].includes(status)) query.status = status;
+      const terms = [recipient, q].filter(Boolean).map(value => String(value).trim()).filter(Boolean);
+      if (terms.length) {
+        query.$or = terms.flatMap(value => {
+          const escaped = value.slice(0, 120).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          return [
+            { to: { $regex: escaped, $options: 'i' } },
+            { subject: { $regex: escaped, $options: 'i' } },
+            { message: { $regex: escaped, $options: 'i' } }
+          ];
+        });
       }
 
+      const now = new Date();
+      const retentionDays = Math.max(1, Number.parseInt(process.env.EMAIL_RETENTION_DAYS || '90', 10));
+      const retentionCutoff = new Date(now.getTime() - retentionDays * 24 * 60 * 60 * 1000);
+      query.createdAt = { $gte: retentionCutoff, $lte: now };
       if (startDate || endDate) {
-        query.createdAt = {};
         if (startDate) {
           const start = new Date(startDate);
           if (Number.isNaN(start.getTime())) throw new Error('Invalid start date');
           start.setHours(0, 0, 0, 0);
-          query.createdAt.$gte = start;
+          query.createdAt.$gte = start < retentionCutoff ? retentionCutoff : start;
         }
         if (endDate) {
           const end = new Date(endDate);
           if (Number.isNaN(end.getTime())) throw new Error('Invalid end date');
           end.setHours(23, 59, 59, 999);
-          query.createdAt.$lte = end;
+          query.createdAt.$lte = end > now ? now : end;
         }
       }
 
@@ -602,6 +646,33 @@ class EmailService {
       console.error('Error fetching email history:', error);
       throw new Error('Failed to fetch email history');
     }
+  }
+
+  async createScheduledEmail(emailData) {
+    const emailRecord = new Email({
+      user: emailData.userId,
+      from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
+      to: Array.isArray(emailData.to) ? emailData.to.join(', ') : emailData.to,
+      subject: emailData.subject,
+      message: emailData.message,
+      html: emailData.html,
+      attachments: (emailData.attachments || []).map(file => ({
+        filename: file.originalname,
+        path: file.path,
+        size: file.size
+      })),
+      status: 'scheduled',
+      scheduledAt: emailData.scheduledAt
+    });
+    return emailRecord.save();
+  }
+
+  async cancelScheduledEmail(emailId, userId) {
+    return Email.findOneAndUpdate(
+      { _id: emailId, user: userId, status: 'scheduled' },
+      { $set: { status: 'canceled', error: 'Canceled by user' } },
+      { new: true }
+    );
   }
 
   async getEmailStats(userId) {
@@ -656,7 +727,7 @@ class EmailService {
         byStatus: stats.reduce((acc, stat) => {
           acc[stat._id] = stat.count;
           return acc;
-        }, { sent: 0, failed: 0, pending: 0 })
+        }, { sent: 0, failed: 0, pending: 0, scheduled: 0, canceled: 0 })
       };
     } catch (error) {
       console.error('Error fetching email stats:', error);

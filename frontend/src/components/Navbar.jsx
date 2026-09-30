@@ -1,5 +1,5 @@
 import React from 'react';
-import { PenSquare, History, BarChart3, Info, Home, Mail, LogOut } from 'lucide-react';
+import { PenSquare, History, BarChart3, Info, Home, Mail, LogOut, LockKeyhole, BookOpen } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 const Navbar = ({ activeTab, setActiveTab, onCheckHealth, user, onLogout }) => {
@@ -10,7 +10,9 @@ const Navbar = ({ activeTab, setActiveTab, onCheckHealth, user, onLogout }) => {
         { id: 'compose', icon: PenSquare, label: 'Compose' },
         { id: 'history', icon: History, label: 'History' },
         { id: 'stats', icon: BarChart3, label: 'Analytics' },
+        { id: 'library', icon: BookOpen, label: 'Library' },
         { id: 'about', icon: Info, label: 'About' },
+        { id: 'security', icon: LockKeyhole, label: 'Security' },
     ];
 
     const handleNavClick = (tabId) => {

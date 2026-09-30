@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Send, User, Type, FileCode, PenTool, Paperclip, X, Ghost } from 'lucide-react';
 import SimpleEditor from './SimpleEditor';
 
-const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFileChange, removeAttachment }) => {
+const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFileChange, removeAttachment, autosaveState }) => {
     const [showHtml, setShowHtml] = useState(false);
     const [isGhostMode, setIsGhostMode] = useState(false);
 
@@ -16,6 +16,7 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
             <div className="compose-paper">
                 <div className="compose-header">
                     <h2>Compose New Message</h2>
+                    <span className="autosave-status">{autosaveState}</span>
                     <div className="window-controls">
                         <span className="control-dot close"></span>
                         <span className="control-dot minimize"></span>

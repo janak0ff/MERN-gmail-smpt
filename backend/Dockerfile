@@ -16,7 +16,9 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY package*.json ./
 COPY . .
 
-RUN mkdir -p uploads
+RUN mkdir -p uploads && chown -R node:node /app
+
+USER node
 
 EXPOSE 5000
 

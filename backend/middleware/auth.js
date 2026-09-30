@@ -14,18 +14,32 @@ const signUserToken = (user) => jwt.sign(
   { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
 );
 
+const AUTH_COOKIE = 'auth_token';
+const cookieOptions = () => ({
+  httpOnly: true,
+  sameSite: process.env.COOKIE_SAME_SITE || 'lax',
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: '/'
+});
+const setAuthCookie = (res, user) => res.cookie(AUTH_COOKIE, signUserToken(user), cookieOptions());
+const clearAuthCookie = (res) => res.clearCookie(AUTH_COOKIE, { ...cookieOptions(), maxAge: undefined });
+
 const requireAuth = async (req, res, next) => {
   try {
     const header = req.headers.authorization || '';
-    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+    const token = req.cookies?.[AUTH_COOKIE] || (header.startsWith('Bearer ') ? header.slice(7) : null);
     if (!token) {
       return res.status(401).json({ success: false, message: 'Authentication required' });
     }
 
     const payload = jwt.verify(token, getJwtSecret());
-    const user = await User.findById(payload.sub);
+    const user = await User.findById(payload.sub).select('+passwordChangedAt');
     if (!user) {
       return res.status(401).json({ success: false, message: 'User account not found' });
+    }
+    if (user.passwordChangedAt && payload.iat * 1000 < user.passwordChangedAt.getTime()) {
+      return res.status(401).json({ success: false, message: 'Session expired' });
     }
 
     req.user = user;
@@ -38,4 +52,4 @@ const requireAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { requireAuth, signUserToken };
+module.exports = { requireAuth, signUserToken, setAuthCookie, clearAuthCookie };

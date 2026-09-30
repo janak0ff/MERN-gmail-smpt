@@ -2,9 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+const { closeQueue } = require('./queue/emailQueue');
 
 const app = express();
 
@@ -18,6 +20,7 @@ app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
+app.use(cookieParser());
 
 // Rate limiting
 const limiter = rateLimit({
@@ -46,6 +49,8 @@ app.get('/api/health', (req, res) => {
 
 // Routes
 app.use('/api/email', require('./routes/email'));
+app.use('/api/templates', require('./routes/templates'));
+app.use('/api/drafts', require('./routes/drafts'));
 app.use('/api/auth', require('./routes/auth'));
 
 let reconnectTimer;
@@ -129,6 +134,7 @@ const shutdown = async (signal) => {
   console.log(`${signal} received, shutting down gracefully`);
   clearTimeout(reconnectTimer);
   server.close(async () => {
+    await closeQueue();
     await mongoose.connection.close(false);
     process.exit(0);
   });

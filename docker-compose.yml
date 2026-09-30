@@ -1,4 +1,21 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: mern-smtp-redis
+    restart: "no"
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mern-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # MongoDB service (optional - only needed if using local DB)
   mongodb:
     profiles: ["local-db"]
@@ -38,10 +55,14 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017/mern_smtp
       - NODE_ENV=production
       - CLIENT_URL=http://localhost:3000
+      - REDIS_URL=redis://redis:6379
     volumes:
-      - ./backend/uploads:/app/uploads
+      - uploads_data:/app/uploads
     networks:
       - mern-network
+    depends_on:
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/email/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
@@ -50,6 +71,28 @@ services:
       start_period: 40s
 
   # Frontend service
+  worker:
+    env_file:
+      - ./backend/.env
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mern-smtp-worker
+    restart: "no"
+    mem_limit: 256m
+    command: ["node", "workers/emailWorker.js"]
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - MONGODB_URI_LOCAL=mongodb://mongodb:27017/mern_smtp
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - mern-network
+
   frontend:
     build:
       context: ./frontend
@@ -79,4 +122,8 @@ networks:
 
 volumes:
   mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  uploads_data:
     driver: local

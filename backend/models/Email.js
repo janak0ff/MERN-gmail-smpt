@@ -38,7 +38,7 @@ const emailSchema = new mongoose.Schema({
   }],
   status: {
     type: String,
-    enum: ['sent', 'failed', 'pending'],
+    enum: ['sent', 'failed', 'pending', 'scheduled', 'canceled'],
     default: 'pending'
   },
   messageId: {
@@ -56,6 +56,14 @@ const emailSchema = new mongoose.Schema({
   attempts: {
     type: Number,
     default: 0
+  },
+  scheduledAt: {
+    type: Date,
+    default: null
+  },
+  queueJobId: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true
