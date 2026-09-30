@@ -261,7 +261,35 @@ sudo mv /etc/nginx/conf.d/mern-gmail-smpt.conf \
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-## 7. Docker image design
+## 7. Security and operations
+
+The API uses multi-user JWT authentication. Register and sign in through the
+frontend; protected send, history, statistics, email-detail, and SMTP-health
+endpoints require a bearer token. Set a unique high-entropy `JWT_SECRET` in
+every deployment and never commit it.
+
+Attachments are limited to five files, 10 MB per file, 25 MB total, and an
+allowlist of common document, image, archive, and text MIME types. Temporary
+upload files are removed after the send attempt. The Docker services bind only
+to `127.0.0.1`; public traffic should enter through Nginx.
+
+The application exposes:
+
+```text
+GET /api/health          liveness check (no authentication)
+GET /api/email/health    MongoDB readiness check (no authentication)
+GET /api/email/health/check  SMTP check (authentication required)
+```
+
+Run the validation checks locally or in CI:
+
+```bash
+(cd backend && npm ci && node --check server.js && node --check routes/email.js)
+(cd frontend && npm ci && npm run lint && npm run build)
+docker compose config --quiet
+```
+
+## 8. Docker image design
 
 ### Backend
 

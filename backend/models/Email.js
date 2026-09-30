@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const emailSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
+  },
   from: {
     type: String,
     required: true,
@@ -22,7 +28,8 @@ const emailSchema = new mongoose.Schema({
   },
   html: {
     type: String,
-    default: ''
+    default: '',
+    maxlength: 200000
   },
   attachments: [{
     filename: String,
@@ -58,6 +65,8 @@ const emailSchema = new mongoose.Schema({
 emailSchema.index({ createdAt: -1 });
 emailSchema.index({ to: 1 });
 emailSchema.index({ status: 1 });
+emailSchema.index({ user: 1, createdAt: -1 });
+emailSchema.index({ user: 1, status: 1, createdAt: -1 });
 
 // Virtual for email age
 emailSchema.virtual('age').get(function () {

@@ -1,8 +1,8 @@
 import React from 'react';
-import { PenSquare, History, BarChart3, Info, Home, Menu, X, Mail } from 'lucide-react';
+import { PenSquare, History, BarChart3, Info, Home, Mail, LogOut } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
-const Navbar = ({ activeTab, setActiveTab, onCheckHealth }) => {
+const Navbar = ({ activeTab, setActiveTab, onCheckHealth, user, onLogout }) => {
 
 
     const navItems = [
@@ -43,7 +43,9 @@ const Navbar = ({ activeTab, setActiveTab, onCheckHealth }) => {
                     </div>
 
                     <div className="navbar-actions">
+                        <span className="navbar-user">{user?.name}</span>
                         <ThemeToggle />
+                        <button className="logout-button" onClick={onLogout} title="Sign out"><LogOut size={17} /></button>
                         <button
                             className="status-indicator"
                             onClick={onCheckHealth}

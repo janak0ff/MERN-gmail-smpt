@@ -8,6 +8,11 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  console.error('JWT_SECRET must be configured with at least 32 characters');
+  process.exit(1);
+}
+
 // Trust the single Nginx reverse proxy used in production.
 app.set('trust proxy', 1);
 
@@ -31,8 +36,17 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: 'alive',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Routes
 app.use('/api/email', require('./routes/email'));
+app.use('/api/auth', require('./routes/auth'));
 
 let reconnectTimer;
 
@@ -81,7 +95,15 @@ mongoose.connection.on('error', (error) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  if (err instanceof require('multer').MulterError || err.message === 'Unsupported attachment type') {
+    return res.status(400).json({
+      success: false,
+      message: err.message === 'Unsupported attachment type'
+        ? err.message
+        : 'Attachment upload limits were exceeded'
+    });
+  }
+  console.error('Unhandled request error:', err.message);
   res.status(500).json({
     success: false,
     message: 'Something went wrong!'

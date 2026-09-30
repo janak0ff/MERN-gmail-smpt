@@ -103,6 +103,7 @@ class EmailService {
       // Create email record in database with pending status (SKIP if ghost mode)
       if (!emailData.ghostMode) {
         emailRecord = new Email({
+          user: emailData.userId,
           from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
           to: Array.isArray(emailData.to) ? emailData.to.join(', ') : emailData.to,
           subject: emailData.subject,
@@ -555,20 +556,25 @@ class EmailService {
       } = filters;
 
       // Build query
-      const query = {};
+      const query = { user: filters.userId };
 
       if (status && status !== 'all') query.status = status;
-      if (recipient) query.to = { $regex: recipient, $options: 'i' };
+      if (recipient) {
+        const escapedRecipient = recipient.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        query.to = { $regex: escapedRecipient, $options: 'i' };
+      }
 
       if (startDate || endDate) {
         query.createdAt = {};
         if (startDate) {
           const start = new Date(startDate);
+          if (Number.isNaN(start.getTime())) throw new Error('Invalid start date');
           start.setHours(0, 0, 0, 0);
           query.createdAt.$gte = start;
         }
         if (endDate) {
           const end = new Date(endDate);
+          if (Number.isNaN(end.getTime())) throw new Error('Invalid end date');
           end.setHours(23, 59, 59, 999);
           query.createdAt.$lte = end;
         }
@@ -577,8 +583,8 @@ class EmailService {
       // Execute query
       const emails = await Email.find(query)
         .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
+        .limit(Number(limit))
+        .skip((Number(page) - 1) * Number(limit))
         .select('-__v');
 
       const total = await Email.countDocuments(query);
@@ -587,9 +593,9 @@ class EmailService {
         emails,
         pagination: {
           total,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          totalPages: Math.ceil(total / limit)
+          page: Number(page),
+          limit: Number(limit),
+          totalPages: Math.ceil(total / Number(limit))
         }
       };
     } catch (error) {
@@ -598,9 +604,10 @@ class EmailService {
     }
   }
 
-  async getEmailStats() {
+  async getEmailStats(userId) {
     try {
       const stats = await Email.aggregate([
+        { $match: { user: userId } },
         {
           $group: {
             _id: '$status',
@@ -609,27 +616,27 @@ class EmailService {
         }
       ]);
 
-      const total = await Email.countDocuments();
+      const total = await Email.countDocuments({ user: userId });
 
       // Today's count
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const todayCount = await Email.countDocuments({
-        createdAt: { $gte: today }
+        user: userId, createdAt: { $gte: today }
       });
 
       // Last 7 days count
       const last7Days = new Date();
       last7Days.setDate(last7Days.getDate() - 7);
       const last7DaysCount = await Email.countDocuments({
-        createdAt: { $gte: last7Days }
+        user: userId, createdAt: { $gte: last7Days }
       });
 
       // Last 30 days count
       const last30Days = new Date();
       last30Days.setDate(last30Days.getDate() - 30);
       const last30DaysCount = await Email.countDocuments({
-        createdAt: { $gte: last30Days }
+        user: userId, createdAt: { $gte: last30Days }
       });
 
       // This month count
@@ -637,7 +644,7 @@ class EmailService {
       thisMonth.setDate(1);
       thisMonth.setHours(0, 0, 0, 0);
       const thisMonthCount = await Email.countDocuments({
-        createdAt: { $gte: thisMonth }
+        user: userId, createdAt: { $gte: thisMonth }
       });
 
       return {

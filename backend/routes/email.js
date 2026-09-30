@@ -7,6 +7,21 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
+const { requireAuth } = require('../middleware/auth');
+
+const MAX_ATTACHMENTS = 5;
+const MAX_TOTAL_ATTACHMENT_SIZE = 25 * 1024 * 1024;
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'application/zip',
+  'image/gif',
+  'image/jpeg',
+  'image/png',
+  'text/plain',
+  'text/csv',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+]);
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
@@ -31,8 +46,27 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024, files: MAX_ATTACHMENTS },
+  fileFilter: (req, file, cb) => {
+    if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
+      return cb(new Error('Unsupported attachment type'));
+    }
+    cb(null, true);
+  }
 });
+
+const removeUploadedFiles = async (files = []) => {
+  await Promise.all(files.map(async file => {
+    if (!file?.path) return;
+    try {
+      await fs.promises.unlink(file.path);
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        console.error('Attachment cleanup failed:', error.message);
+      }
+    }
+  }));
+};
 
 // Rate limiting for email sending
 const sendEmailLimiter = rateLimit({
@@ -45,7 +79,7 @@ const sendEmailLimiter = rateLimit({
 });
 
 // Send email
-router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, res) => {
+router.post('/send', requireAuth, sendEmailLimiter, upload.array('attachments'), async (req, res) => {
   try {
     console.log('=== Send Email Request ===');
 
@@ -61,10 +95,12 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
         .filter(Boolean);
     }
 
-    console.log('Recipients (sanitized):', to);
-    console.log('Subject:', subject);
-    console.log('Message length:', message?.length);
-    console.log('HTML provided:', !!html);
+    console.log('Send request received', {
+      userId: req.user._id.toString(),
+      recipientCount: to?.length || 0,
+      messageLength: message?.length || 0,
+      attachmentCount: req.files?.length || 0
+    });
 
     // Validation
     if (!to?.length || !subject || !message) {
@@ -74,6 +110,16 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
       });
     }
 
+    if (to.length > 20) {
+      return res.status(400).json({ success: false, message: 'A maximum of 20 recipients is allowed' });
+    }
+    if (subject.length > 200 || message.length > 100000) {
+      return res.status(400).json({ success: false, message: 'Subject or message is too long' });
+    }
+    if ((req.files || []).reduce((sum, file) => sum + file.size, 0) > MAX_TOTAL_ATTACHMENT_SIZE) {
+      await removeUploadedFiles(req.files);
+      return res.status(400).json({ success: false, message: 'Total attachments must be 25 MB or less' });
+    }
     // Strict Email validation
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     const invalidRecipient = to.find(recipient => !emailRegex.test(recipient));
@@ -86,15 +132,6 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
     }
 
     // Subject length validation
-    if (subject.length > 200) {
-      return res.status(400).json({
-        success: false,
-        message: 'Subject must be less than 200 characters'
-      });
-    }
-
-
-
     // Send email
     const emailResult = await emailService.sendEmail({
       to,
@@ -102,8 +139,10 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
       message,
       html,
       attachments: req.files, // Pass uploaded files
-      ghostMode: ghostMode === 'true' || ghostMode === true // Handle both string (multipart) and boolean
+      ghostMode: ghostMode === 'true' || ghostMode === true, // Handle both string (multipart) and boolean
+      userId: req.user._id
     });
+    await removeUploadedFiles(req.files);
 
     if (emailResult.success) {
       res.status(200).json({
@@ -123,7 +162,7 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
 
   } catch (error) {
     console.error('Send email error:', error);
-    console.error('Error stack:', error.stack);
+    await removeUploadedFiles(req.files);
 
     // Check for validation errors
     if (error.message.includes('Invalid email') ||
@@ -142,14 +181,13 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
 
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
-      error: error.message
+      message: 'Internal server error'
     });
   }
 });
 
 // Get email history with filters
-router.get('/history', async (req, res) => {
+router.get('/history', requireAuth, async (req, res) => {
   try {
     const {
       page = 1,
@@ -162,6 +200,19 @@ router.get('/history', async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
 
+    const parsedPage = Number.parseInt(page, 10);
+    const parsedLimit = Number.parseInt(limit, 10);
+    if (!Number.isInteger(parsedPage) || parsedPage < 1 ||
+      !Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > 100) {
+      return res.status(400).json({ success: false, message: 'Invalid pagination values' });
+    }
+    if (sortOrder !== 'asc' && sortOrder !== 'desc') {
+      return res.status(400).json({ success: false, message: 'Invalid sort order' });
+    }
+    if (!['createdAt', 'sentAt', 'status', 'subject'].includes(sortBy)) {
+      return res.status(400).json({ success: false, message: 'Invalid sort field' });
+    }
+
     const result = await emailService.getEmailHistory({
       page,
       limit,
@@ -170,7 +221,8 @@ router.get('/history', async (req, res) => {
       startDate,
       endDate,
       sortBy,
-      sortOrder
+      sortOrder,
+      userId: req.user._id
     });
 
     res.status(200).json({
@@ -187,9 +239,9 @@ router.get('/history', async (req, res) => {
 });
 
 // Get email statistics
-router.get('/stats/summary', async (req, res) => {
+router.get('/stats/summary', requireAuth, async (req, res) => {
   try {
-    const stats = await emailService.getEmailStats();
+    const stats = await emailService.getEmailStats(req.user._id);
 
     res.status(200).json({
       success: true,
@@ -216,7 +268,7 @@ router.get('/health', async (req, res) => {
 });
 
 // Check SMTP connection
-router.get('/health/check', async (req, res) => {
+router.get('/health/check', requireAuth, async (req, res) => {
   try {
     const isConnected = await emailService.verifyConnection();
     res.status(200).json({
@@ -233,9 +285,9 @@ router.get('/health/check', async (req, res) => {
 });
 
 // Get specific email by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireAuth, async (req, res) => {
   try {
-    const email = await Email.findById(req.params.id);
+    const email = await Email.findOne({ _id: req.params.id, user: req.user._id });
 
     if (!email) {
       return res.status(404).json({

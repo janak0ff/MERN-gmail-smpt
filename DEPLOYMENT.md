@@ -57,12 +57,18 @@ DB_SOURCE=cloud
 MONGODB_URI_CLOUD=mongodb+srv://<user>:<url-encoded-password>@<cluster>/<database>?retryWrites=true&w=majority&appName=quick-mail
 GMAIL_USER=<gmail-address>
 GMAIL_APP_PASSWORD=<gmail-app-password>
+JWT_SECRET=<long-random-secret>
+JWT_EXPIRES_IN=7d
 CLIENT_URL=https://your-domain.example
 ```
 
 URL-encode reserved characters in the MongoDB username/password. Add the VM
 public IP to MongoDB Atlas Network Access. Use a least-privileged database
 user. Rotate credentials if they are ever exposed.
+
+The application requires users to register or sign in before sending mail or
+accessing history, statistics, email details, or SMTP health. Set `JWT_SECRET`
+to a unique high-entropy value and do not store it in Git.
 
 ## 3. Pre-deployment validation
 
@@ -122,6 +128,10 @@ sudo docker compose restart backend
 sudo docker compose up -d --build
 sudo docker compose down
 ```
+
+Docker binds application ports to localhost only. Host Nginx should proxy
+port 80 to `127.0.0.1:3000` and `/api/` to `127.0.0.1:5000`; do not expose
+ports 3000 or 5000 directly to the Internet.
 
 The optional local MongoDB profile is for local-only use:
 

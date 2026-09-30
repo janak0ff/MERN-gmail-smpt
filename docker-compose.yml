@@ -5,10 +5,11 @@ services:
     image: mongo:7.0
     container_name: mern-smtp-mongodb
     restart: "no"
+    mem_limit: 512m
     environment:
       MONGO_INITDB_DATABASE: mern_smtp
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     volumes:
       - mongodb_data:/data/db
     networks:
@@ -28,8 +29,9 @@ services:
       dockerfile: Dockerfile
     container_name: mern-smtp-backend
     restart: "no"
+    mem_limit: 256m
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     environment:
       - PORT=5000
       - MONGODB_URI_LOCAL=mongodb://mongodb:27017/mern_smtp
@@ -56,8 +58,9 @@ services:
         - VITE_API_URL=/api
     container_name: mern-smtp-frontend
     restart: "no"
+    mem_limit: 128m
     ports:
-      - "3000:80"
+      - "127.0.0.1:3000:80"
     depends_on:
       backend:
         condition: service_healthy

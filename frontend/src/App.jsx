@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from './api';
 import { ToastContainer, toast } from 'react-toastify';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import 'react-toastify/dist/ReactToastify.css';
@@ -12,10 +12,11 @@ import EmailStats from './components/EmailStats';
 import AboutUs from './components/AboutUs';
 import LandingPage from './components/LandingPage';
 import { ThemeProvider } from './context/ThemeContext';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import AuthPage from './components/AuthPage';
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [authChecking, setAuthChecking] = useState(true);
   const [formData, setFormData] = useState({
     to: '',
     subject: '',
@@ -38,6 +39,23 @@ function App() {
     page: 1,
     limit: 10
   });
+
+  useEffect(() => {
+    if (!localStorage.getItem('auth_token')) {
+      setAuthChecking(false);
+      return;
+    }
+    api.get('/auth/me')
+      .then(response => setUser(response.data.user))
+      .catch(() => localStorage.removeItem('auth_token'))
+      .finally(() => setAuthChecking(false));
+  }, []);
+
+  useEffect(() => {
+    const handleAuthLogout = () => setUser(null);
+    window.addEventListener('auth:logout', handleAuthLogout);
+    return () => window.removeEventListener('auth:logout', handleAuthLogout);
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'history') {
@@ -105,7 +123,7 @@ function App() {
         data.append('attachments', file);
       });
 
-      const response = await axios.post(`${API_BASE_URL}/email/send`, data, {
+      const response = await api.post('/email/send', data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -167,7 +185,7 @@ function App() {
         if (filters[key]) params.append(key, filters[key]);
       });
 
-      const response = await axios.get(`${API_BASE_URL}/email/history?${params}`);
+      const response = await api.get(`/email/history?${params}`);
 
       if (response.data.success) {
         let serverEmails = response.data.emails;
@@ -222,7 +240,7 @@ function App() {
   const fetchStats = async () => {
     setStatsLoading(true);
     try {
-      const response = await axios.get(`${API_BASE_URL}/email/stats/summary`);
+      const response = await api.get('/email/stats/summary');
       if (response.data.success) {
         setStats(response.data);
       }
@@ -235,7 +253,7 @@ function App() {
 
   const checkSMTPHealth = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/email/health/check`);
+      const response = await api.get('/email/health/check');
       if (response.data.smtpConnected) {
         toast.success('✅ SMTP connection is healthy');
       } else {
@@ -272,12 +290,41 @@ function App() {
     }
   };
 
+  if (authChecking) return null;
+  if (!user) {
+    return (
+      <ThemeProvider>
+        <AuthPage onAuthenticated={setUser} />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
+      </ThemeProvider>
+    );
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    setUser(null);
+    setActiveTab('home');
+  };
+
   return (
     <ThemeProvider>
       <Layout
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onCheckHealth={checkSMTPHealth}
+        user={user}
+        onLogout={handleLogout}
       >
         {activeTab === 'home' && (
           <LandingPage onGetStarted={() => setActiveTab('compose')} />
