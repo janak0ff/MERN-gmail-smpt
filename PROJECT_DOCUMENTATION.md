@@ -40,6 +40,10 @@ its local history in `localStorage`.
 │   └── .env.production             Production same-origin API URL
 ├── docker-compose.yml              Backend + frontend + optional MongoDB
 ├── nginx.local.conf                Host Nginx localhost production config
+├── nginx.cloud.conf                Host Nginx cloud/domain template
+├── ecosystem.config.cjs            PM2 production process definition
+├── install_node.sh                 Debian/RHEL Node.js installer
+├── install_mongodb.sh              Debian/RHEL MongoDB installer
 ├── DOCKER.md                       Docker quick-start guide
 ├── DEPLOYMENT.md                   Domain/SSL deployment reference
 └── README.md                       Product and API overview
@@ -47,6 +51,21 @@ its local history in `localStorage`.
 
 The repository intentionally excludes `node_modules`, build output, secrets,
 logs, and uploaded files from version control.
+
+The installation scripts support Debian/Ubuntu and RHEL-family systems. They
+default to Node.js 20 and MongoDB 7.0 and are safe to rerun:
+
+```bash
+sudo ./install_node.sh
+sudo ./install_mongodb.sh
+```
+
+Override the defaults when required:
+
+```bash
+sudo NODE_MAJOR=22 ./install_node.sh
+sudo MONGODB_MAJOR=8.0 ./install_mongodb.sh
+```
 
 ## 3. Environment configuration
 

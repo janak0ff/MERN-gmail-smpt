@@ -24,6 +24,19 @@ Open only the required firewall ports:
 - TCP 80 for HTTP/Certbot.
 - TCP 443 for HTTPS.
 
+On Debian/Ubuntu or RHEL-family hosts, the included installers can provision
+Node.js and MongoDB:
+
+```bash
+sudo ./install_node.sh
+sudo ./install_mongodb.sh
+```
+
+They default to Node.js 20 and MongoDB 7.0, detect the package-manager family,
+install the vendor signing key, configure the matching repository, and enable
+the `mongod` service. MongoDB is optional when using Atlas; do not run the
+MongoDB installer unless the server will host a local database.
+
 Do not expose MongoDB port 27017 or backend port 5000 publicly when Nginx is
 the public entry point.
 
