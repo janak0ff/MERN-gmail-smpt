@@ -50,18 +50,23 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
 
     let { to, subject, message, html, ghostMode } = req.body;
 
-    // Sanitize 'to' field - remove any HTML tags that might have been accidentally included
+    // Accept comma- or semicolon-separated recipients, including array-style input.
     if (to) {
-      to = to.replace(/<[^>]*>/g, '').trim();
+      to = String(to)
+        .replace(/<[^>]*>/g, '')
+        .replace(/^\s*\[\s*|\s*\]\s*$/g, '')
+        .split(/[;,]/)
+        .map(recipient => recipient.trim())
+        .filter(Boolean);
     }
 
-    console.log('Recipient (sanitized):', to);
+    console.log('Recipients (sanitized):', to);
     console.log('Subject:', subject);
     console.log('Message length:', message?.length);
     console.log('HTML provided:', !!html);
 
     // Validation
-    if (!to || !subject || !message) {
+    if (!to?.length || !subject || !message) {
       return res.status(400).json({
         success: false,
         message: 'All fields (to, subject, message) are required'
@@ -70,11 +75,12 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
 
     // Strict Email validation
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    if (!emailRegex.test(to)) {
-      console.error('Email validation failed for:', to);
+    const invalidRecipient = to.find(recipient => !emailRegex.test(recipient));
+    if (invalidRecipient) {
+      console.error('Email validation failed for:', invalidRecipient);
       return res.status(400).json({
         success: false,
-        message: `Invalid email address format: ${to}`
+        message: `Invalid email address format: ${invalidRecipient}`
       });
     }
 

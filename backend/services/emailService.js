@@ -105,7 +105,7 @@ class EmailService {
       if (!emailData.ghostMode) {
         emailRecord = new Email({
           from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
-          to: emailData.to,
+          to: Array.isArray(emailData.to) ? emailData.to.join(', ') : emailData.to,
           subject: emailData.subject,
           message: emailData.message,
           html: emailData.html,
@@ -119,20 +119,24 @@ class EmailService {
       }
 
       // Validate email format
+      const recipients = Array.isArray(emailData.to) ? emailData.to : [emailData.to];
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailData.to)) {
+      const invalidRecipient = recipients.find(recipient => !emailRegex.test(recipient));
+      if (invalidRecipient) {
         throw new Error('Invalid recipient email address');
       }
 
-      // Validate email deeply (SMTP check)
-      await this.validateEmailDeeply(emailData.to);
-
       // Prepare email options
+      const senderAddress = process.env.GMAIL_USER || 'noreply@mern-smtp-app.com';
       const mailOptions = {
-        from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
-        to: emailData.to,
+        from: {
+          name: process.env.MAIL_FROM_NAME || 'MERN SMTP',
+          address: senderAddress
+        },
+        replyTo: process.env.MAIL_REPLY_TO || senderAddress,
+        to: recipients,
         subject: emailData.subject,
-        text: emailData.message,
+        text: this.formatPlainText(emailData.message),
         html: this.formatPlainTextToHTML(emailData.message, emailData.subject, emailData.html, emailData.attachments),
         attachments: (emailData.attachments && emailData.attachments.length > 0)
           ? emailData.attachments.map(file => ({
@@ -152,7 +156,7 @@ class EmailService {
         await emailRecord.save();
       }
 
-      console.log('Attempting to send email to:', emailData.to);
+      console.log('Attempting to send email to:', recipients.join(', '));
       console.log('Attachments count:', emailData.attachments ? emailData.attachments.length : 0);
 
       // Send email
@@ -200,6 +204,18 @@ class EmailService {
         technicalError: error.message
       };
     }
+  }
+
+  formatPlainText(text) {
+    return text
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .trim();
   }
 
   formatPlainTextToHTML(text, subject = 'No Subject', extraHtml = null, attachments = []) {
@@ -403,8 +419,7 @@ class EmailService {
           <div class="email-wrapper">
               <div class="email-container">
                   <div class="email-header">
-                      <div class="brand-logo">✨ Hello Sir / Madam</div>
-                      <div class="header-subtitle">Subject: ${subject}</div>
+                      <div class="brand-logo">${subject}</div>
                   </div>
                   
                   <div class="email-body">
@@ -422,12 +437,7 @@ class EmailService {
                   </div>
                   
                   <div class="email-footer">
-                      <p class="footer-text">Sent By Janak Kr Shrestha</p>
-                      <p class="footer-text">
-                          <a href="https://www.linkedin.com/in/janakkss/" class="footer-link">Linkedin</a> |
-                          <a href="https://www.janakkumarshrestha0.com.np/" class="footer-link">Portfolio</a>
-                      </p>
-                      <p class="footer-text">Thank You for your time</p>
+                      <p class="footer-text">Sent from ${process.env.GMAIL_USER || 'MERN SMTP'}</p>
                   </div>
               </div>
           </div>
@@ -634,7 +644,9 @@ Best regards,
         validateMx: true,
         validateTypo: true,
         validateDisposable: true,
-        validateSMTP: true,
+        // SMTP mailbox probing is unreliable and commonly rejects valid recipients.
+        // Gmail's delivery response is the authoritative delivery result.
+        validateSMTP: false,
       });
 
       console.log('Validation result:', { valid, reason, validators });
