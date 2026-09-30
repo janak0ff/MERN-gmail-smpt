@@ -8,6 +8,9 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
+// Trust the single Nginx reverse proxy used in production.
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 

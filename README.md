@@ -7,6 +7,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 ---
 
 ## Table of Contents
+- [Project Documentation](#-project-documentation)
 - [Use Cases](#-use-cases)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
@@ -17,6 +18,14 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - [Project Structure](#-project-structure)
 - [API Reference](#-api-reference)
 - [Contributing](#-contributing)
+
+---
+
+## Project Documentation
+
+See [PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md) for the authoritative
+setup, environment, Docker, Nginx, production operations, API, troubleshooting,
+and deployment checklist.
 
 ---
 
@@ -62,7 +71,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - **Accessibility**: Keyboard navigation and screen reader support
 
 ### Security \  Reliability
-- **Email Validation**: Deep validation with MX, typo, and disposable checks
+- **Email Validation**: Basic recipient syntax validation before delivery
 - **Rate Limiting**: Prevent abuse with configurable request limits (10 emails/15 minutes)
 - **Secure Authentication**: Gmail OAuth2-ready SMTP integration
 - **Ghost Mode Privacy**: Optional local-only storage for sensitive communications
@@ -86,7 +95,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - **Runtime**: Node.js with Express.js
 - **Database**: MongoDB (Atlas or Local)
 - **Email**: Nodemailer with Gmail SMTP
-- **Validation**: Deep Email Validator
+- **Validation**: Server-side recipient syntax checks
 - **Security**: Helmet, CORS, Express Rate Limit
 - **File Upload**: Multer
 
