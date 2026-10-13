@@ -48,7 +48,12 @@ cd quick-mail
 git switch feature
 ```
 
-Create `backend/.env`; never commit it:
+Create `backend/.env` from the included template; never commit it:
+
+```bash
+cp backend/.env.example backend/.env
+chmod 600 backend/.env
+```
 
 ```env
 PORT=5000
@@ -126,7 +131,7 @@ sudo docker compose down
 The optional local MongoDB profile is for local-only use:
 
 ```bash
-# Set DB_SOURCE=local in backend/.env first.
+# Set DB_SOURCE=local in both .env and backend/.env first.
 sudo docker compose --profile local-db up -d --build
 ```
 

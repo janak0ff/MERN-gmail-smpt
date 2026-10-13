@@ -71,7 +71,14 @@ sudo MONGODB_MAJOR=8.0 ./install_mongodb.sh
 
 ### Backend
 
-Create or edit the ignored file `backend/.env`:
+Create the ignored backend runtime file from the template:
+
+```bash
+cp backend/.env.example backend/.env
+chmod 600 backend/.env
+```
+
+Edit `backend/.env`:
 
 ```env
 PORT=5000
@@ -85,6 +92,18 @@ CLIENT_URL=http://localhost:3000
 
 Use `DB_SOURCE=local` and `MONGODB_URI_LOCAL` only when using the optional
 local MongoDB Compose profile. Never commit `backend/.env`.
+
+### Root Compose environment
+
+Create the ignored root Compose file:
+
+```bash
+cp .env.example .env
+```
+
+Set `DB_SOURCE=cloud` for Atlas or `DB_SOURCE=local` for the optional local
+MongoDB container. The root file controls Compose substitution; the backend
+file contains the Atlas URI and SMTP secrets.
 
 ### Frontend
 
@@ -206,9 +225,12 @@ sudo docker compose down
 The optional local MongoDB service is behind the `local-db` profile:
 
 ```bash
-# Set DB_SOURCE=local in backend/.env first.
+# Set DB_SOURCE=local in both .env and backend/.env first.
 sudo docker compose --profile local-db up -d --build
 ```
+
+Do not use `docker compose down -v` unless local MongoDB data should be
+deleted. Atlas data is managed by MongoDB Atlas and is unaffected by Compose.
 
 The Docker frontend is built with `VITE_API_URL=/api`; its Nginx container
 proxies `/api` to the backend service on the Compose network.

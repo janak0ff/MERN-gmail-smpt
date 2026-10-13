@@ -27,9 +27,16 @@ docker compose version
 
 ### 1. Environment Setup
 
+Create the Compose environment file:
+
+```bash
+cp .env.example .env
+```
+
 Configure the backend environment file:
 
 ```bash
+cp backend/.env.example backend/.env
 nano backend/.env
 ```
 
@@ -64,7 +71,7 @@ sudo docker compose logs -f
 **Option B: Using Local MongoDB (Docker)**
 
 ```bash
-# Set DB_SOURCE=local in backend/.env first.
+# Set DB_SOURCE=local in both .env and backend/.env first.
 
 # Start the optional MongoDB profile and application
 sudo docker compose --profile local-db up -d --build
@@ -230,6 +237,7 @@ docker compose exec mongodb mongosh mern_smtp
 |----------|-------------|---------|
 | `DB_SOURCE` | Database source: `local` or `cloud` | `cloud` |
 | `MONGODB_URI_CLOUD` | MongoDB Atlas connection string | - |
+| `MONGODB_URI_LOCAL` | Local MongoDB connection string | `mongodb://mongodb:27017/mern_smtp` in Compose |
 | `GMAIL_USER` | Gmail address for SMTP | - |
 | `GMAIL_APP_PASSWORD` | Gmail app-specific password | - |
 | `NODE_ENV` | Environment mode | `production` |
@@ -240,7 +248,7 @@ docker compose exec mongodb mongosh mern_smtp
 
 ### To Local MongoDB:
 
-1. Edit `.env`:
+1. Edit both `.env` and `backend/.env`:
    ```env
    DB_SOURCE=local
    ```
@@ -252,7 +260,7 @@ docker compose exec mongodb mongosh mern_smtp
 
 ### To Cloud MongoDB Atlas:
 
-1. Edit `.env`:
+1. Edit both `.env` and `backend/.env`:
    ```env
    DB_SOURCE=cloud
    MONGODB_URI_CLOUD=mongodb+srv://...

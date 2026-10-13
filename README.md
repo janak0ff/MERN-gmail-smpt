@@ -141,9 +141,14 @@ cd MERN-gmail-smpt
 
 ### Backend Environment Variables
 
-Create a `.env` file in the `backend` directory:
+Create the backend environment file from the included template:
 
-**Path**: `backend/.env`
+```bash
+cp backend/.env.example backend/.env
+chmod 600 backend/.env
+```
+
+**Path**: `backend/.env` (ignored by Git)
 
 ```env
 # ======================
@@ -189,8 +194,8 @@ GMAIL_APP_PASSWORD=your-app-password
 
 **Using Docker** (Recommended for local development):
 ```bash
-# MongoDB will start automatically with docker-compose
-docker compose up -d
+# Set DB_SOURCE=local in both .env and backend/.env
+sudo docker compose --profile local-db up -d --build
 ```
 
 **Using System MongoDB**:
@@ -243,23 +248,18 @@ mongodb+srv://myuser:MySecurePassword123@cluster0.ab1cd.mongodb.net/quickmail?re
 
 ### Docker Method (Recommended)
 
-**Easiest way to run both frontend and backend:**
+**Atlas deployment (recommended):**
 
 ```bash
-# Start all services
-docker compose up -d
-
-# Check container status
-docker compose ps
-
-# View logs
-docker compose logs -f
+cp .env.example .env
+# Set DB_SOURCE=cloud and MONGODB_URI_CLOUD in backend/.env
+sudo docker compose up -d --build backend frontend
 ```
 
 **Docker Features:**
-- ✅ **MongoDB Included**: Local MongoDB (port 27017) for development
+- ✅ **Database Choice**: MongoDB Atlas or optional local MongoDB profile
 - ✅ **Health Checks**: Automatic monitoring for all services
-- ✅ **Auto-Restart**: Containers restart on failure
+- ✅ **Explicit Lifecycle**: Services start/stop through Docker Compose
 - ✅ **Optimized Images**: Multi-stage builds for small footprint
 - ✅ **Volume Persistence**: Email attachments and database data preserved
 
@@ -271,8 +271,25 @@ docker compose logs -f
 
 **Stop Services:**
 ```bash
-docker compose down
+sudo docker compose down
 ```
+
+**Local MongoDB deployment:**
+
+```bash
+# Set DB_SOURCE=local in both .env and backend/.env.
+sudo docker compose --profile local-db up -d --build
+```
+
+Check the deployment:
+
+```bash
+sudo docker compose ps
+curl http://localhost:5000/api/email/health
+```
+
+Do not use `docker compose down -v` unless you intentionally want to delete
+the local MongoDB volume.
 
 ---
 
@@ -458,11 +475,12 @@ git clone https://github.com/janak0ff/MERN-gmail-smpt.git
 cd MERN-gmail-smpt
 
 # Configure environment
+cp .env.example .env
 cp backend/.env.example backend/.env
 nano backend/.env
 
 # Deploy with Docker
-docker compose up -d
+sudo docker compose up -d --build backend frontend
 
 # OR deploy with PM2
 cd backend && npm install
