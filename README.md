@@ -71,7 +71,7 @@ and deployment checklist.
 - **Accessibility**: Keyboard navigation and screen reader support
 
 ### Security \  Reliability
-- **Email Validation**: Basic recipient syntax validation before delivery
+- **Email Validation**: Deep syntax, domain, disposable-address, and mailbox validation before delivery
 - **Rate Limiting**: Prevent abuse with configurable request limits (10 emails/15 minutes)
 - **Secure Authentication**: Gmail OAuth2-ready SMTP integration
 - **Ghost Mode Privacy**: Optional local-only storage for sensitive communications
@@ -95,7 +95,7 @@ and deployment checklist.
 - **Runtime**: Node.js with Express.js
 - **Database**: MongoDB (Atlas or Local)
 - **Email**: Nodemailer with Gmail SMTP
-- **Validation**: Server-side recipient syntax checks
+- **Validation**: Server-side deep recipient and mailbox checks with `deep-email-validator`
 - **Security**: Helmet, CORS, Express Rate Limit
 - **File Upload**: Multer
 
@@ -113,7 +113,7 @@ and deployment checklist.
 
 Before running the application, ensure you have:
 
-- **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
+- **Node.js** (v20 or higher) - [Download](https://nodejs.org/)
 - **MongoDB** (Local or Atlas account) - [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 - **Gmail Account** with App Password enabled
 - **Docker \  Docker Compose** (Optional, for containerized deployment)

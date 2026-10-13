@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { validate } = require('deep-email-validator');
 const Email = require('../models/Email');
 
 class EmailService {
@@ -100,6 +101,9 @@ class EmailService {
         throw new Error('Missing required fields: to, subject, or message');
       }
 
+      const recipients = Array.isArray(emailData.to) ? emailData.to : [emailData.to];
+      await this.validateRecipients(recipients);
+
       // Create email record in database with pending status (SKIP if ghost mode)
       if (!emailData.ghostMode) {
         emailRecord = new Email({
@@ -115,14 +119,6 @@ class EmailService {
         console.log(`Email record created with ID: ${emailRecord._id}`);
       } else {
         console.log('👻 Ghost Mode enabled: Skipping database storage');
-      }
-
-      // Validate email format
-      const recipients = Array.isArray(emailData.to) ? emailData.to : [emailData.to];
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const invalidRecipient = recipients.find(recipient => !emailRegex.test(recipient));
-      if (invalidRecipient) {
-        throw new Error('Invalid recipient email address');
       }
 
       // Prepare email options
@@ -190,8 +186,6 @@ class EmailService {
         userMessage = 'Gmail authentication failed. Please check your app password.';
       } else if (error.message.includes('ENOTFOUND')) {
         userMessage = 'Network error. Please check your internet connection.';
-      } else if (error.message.includes('Invalid recipient')) {
-        userMessage = 'Invalid email address. Please check the recipient email.';
       } else {
         userMessage = error.message;
       }
@@ -199,9 +193,36 @@ class EmailService {
       return {
         success: false,
         error: userMessage,
+        validationError: error.validationError === true,
         emailId: emailRecord?._id,
         technicalError: error.message
       };
+    }
+  }
+
+  async validateRecipients(recipients) {
+    for (const recipient of recipients) {
+      let result;
+
+      try {
+        result = await validate({
+          email: recipient,
+          sender: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com'
+        });
+      } catch (error) {
+        const validationError = new Error(`Unable to validate mailbox: ${recipient}`);
+        validationError.validationError = true;
+        throw validationError;
+      }
+
+      if (!result.valid) {
+        const reason = result.validators?.[result.reason]?.reason;
+        const validationError = new Error(
+          `Invalid or unavailable mailbox: ${recipient}${reason ? ` (${reason})` : ''}`
+        );
+        validationError.validationError = true;
+        throw validationError;
+      }
     }
   }
 

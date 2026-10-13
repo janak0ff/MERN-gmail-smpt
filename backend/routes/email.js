@@ -74,17 +74,6 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
       });
     }
 
-    // Strict Email validation
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    const invalidRecipient = to.find(recipient => !emailRegex.test(recipient));
-    if (invalidRecipient) {
-      console.error('Email validation failed for:', invalidRecipient);
-      return res.status(400).json({
-        success: false,
-        message: `Invalid email address format: ${invalidRecipient}`
-      });
-    }
-
     // Subject length validation
     if (subject.length > 200) {
       return res.status(400).json({
@@ -113,7 +102,7 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
         emailId: emailResult.emailId
       });
     } else {
-      res.status(500).json({
+      res.status(emailResult.validationError ? 400 : 500).json({
         success: false,
         message: 'Failed to send email',
         error: emailResult.error,
