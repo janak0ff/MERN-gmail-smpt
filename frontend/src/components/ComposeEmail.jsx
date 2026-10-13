@@ -27,13 +27,13 @@ const ComposeEmail = ({ formData, handleChange, handleSubmit, loading, handleFil
                     <div className="input-group">
                         <label htmlFor="to">To</label>
                         <input
-                            type="email"
+                            type="text"
                             id="to"
                             name="to"
                             value={formData.to}
                             onChange={handleChange}
                             required
-                            placeholder="recipient@example.com"
+                            placeholder="recipient@example.com, another@example.com"
                             className="clean-input"
                         />
                     </div>

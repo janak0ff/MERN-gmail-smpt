@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose');
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
@@ -50,43 +51,28 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
 
     let { to, subject, message, html, ghostMode } = req.body;
 
-    // Sanitize 'to' field - remove any HTML tags that might have been accidentally included
+    // Accept comma- or semicolon-separated recipients, including array-style input.
     if (to) {
-      to = to.replace(/<[^>]*>/g, '').trim();
+      to = String(to)
+        .replace(/<[^>]*>/g, '')
+        .replace(/^\s*\[\s*|\s*\]\s*$/g, '')
+        .split(/[;,]/)
+        .map(recipient => recipient.trim())
+        .filter(Boolean);
     }
 
-    console.log('Recipient (sanitized):', to);
+    console.log('Recipients (sanitized):', to);
     console.log('Subject:', subject);
     console.log('Message length:', message?.length);
     console.log('HTML provided:', !!html);
 
     // Validation
-    if (!to || !subject || !message) {
+    if (!to?.length || !subject || !message) {
       return res.status(400).json({
         success: false,
         message: 'All fields (to, subject, message) are required'
       });
     }
-
-    // Strict Email validation
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    if (!emailRegex.test(to)) {
-      console.error('Email validation failed for:', to);
-      return res.status(400).json({
-        success: false,
-        message: `Invalid email address format: ${to}`
-      });
-    }
-
-    // Subject length validation
-    if (subject.length > 200) {
-      return res.status(400).json({
-        success: false,
-        message: 'Subject must be less than 200 characters'
-      });
-    }
-
-
 
     // Send email
     const emailResult = await emailService.sendEmail({
@@ -106,7 +92,7 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
         emailId: emailResult.emailId
       });
     } else {
-      res.status(500).json({
+      res.status(emailResult.validationError ? 400 : 500).json({
         success: false,
         message: 'Failed to send email',
         error: emailResult.error,
@@ -199,18 +185,13 @@ router.get('/stats/summary', async (req, res) => {
 
 // Health check endpoint for Docker
 router.get('/health', async (req, res) => {
-  try {
-    res.status(200).json({
-      success: true,
-      status: 'healthy',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      status: 'unhealthy'
-    });
-  }
+  const connected = mongoose.connection.readyState === 1;
+  res.status(connected ? 200 : 503).json({
+    success: connected,
+    status: connected ? 'healthy' : 'unhealthy',
+    database: connected ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Check SMTP connection

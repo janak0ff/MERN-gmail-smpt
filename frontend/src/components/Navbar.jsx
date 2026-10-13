@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { PenSquare, History, BarChart3, Info, Home, Menu, X, Mail } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 

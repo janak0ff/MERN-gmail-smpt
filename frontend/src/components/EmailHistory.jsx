@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Mail, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, Search, Calendar, RotateCcw, Paperclip, X, FileCode, Eye, Ghost } from 'lucide-react';
 
 const EmailHistory = ({
@@ -12,14 +12,19 @@ const EmailHistory = ({
 }) => {
     const [selectedEmail, setSelectedEmail] = useState(null);
 
+    useEffect(() => {
+        document.body.style.overflow = selectedEmail ? 'hidden' : 'auto';
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [selectedEmail]);
+
     const openEmailDetails = (email) => {
         setSelectedEmail(email);
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
     };
 
     const closeEmailDetails = () => {
         setSelectedEmail(null);
-        document.body.style.overflow = 'auto';
     };
 
     return (

@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
+const { validate } = require('deep-email-validator');
 const Email = require('../models/Email');
-const emailValidator = require('deep-email-validator');
 
 class EmailService {
   constructor() {
@@ -101,11 +101,14 @@ class EmailService {
         throw new Error('Missing required fields: to, subject, or message');
       }
 
-      // Create email record in database with pending status (SKIP if ghost mode)
+      const recipients = Array.isArray(emailData.to) ? emailData.to : [emailData.to];
+
+      // Create the record before validation so rejected attempts are visible in
+      // history and analytics as failed (SKIP if ghost mode).
       if (!emailData.ghostMode) {
         emailRecord = new Email({
           from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
-          to: emailData.to,
+          to: Array.isArray(emailData.to) ? emailData.to.join(', ') : emailData.to,
           subject: emailData.subject,
           message: emailData.message,
           html: emailData.html,
@@ -118,22 +121,26 @@ class EmailService {
         console.log('👻 Ghost Mode enabled: Skipping database storage');
       }
 
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailData.to)) {
-        throw new Error('Invalid recipient email address');
+      if (emailData.subject.length > 200) {
+        const validationError = new Error('Subject must be less than 200 characters');
+        validationError.validationError = true;
+        throw validationError;
       }
 
-      // Validate email deeply (SMTP check)
-      await this.validateEmailDeeply(emailData.to);
+      await this.validateRecipients(recipients);
 
       // Prepare email options
+      const senderAddress = process.env.GMAIL_USER || 'noreply@mern-smtp-app.com';
       const mailOptions = {
-        from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
-        to: emailData.to,
+        from: {
+          name: process.env.MAIL_FROM_NAME || 'MERN SMTP',
+          address: senderAddress
+        },
+        replyTo: process.env.MAIL_REPLY_TO || senderAddress,
+        to: recipients,
         subject: emailData.subject,
-        text: emailData.message,
-        html: this.formatPlainTextToHTML(emailData.message, emailData.subject, emailData.html, emailData.attachments),
+        text: this.formatPlainText(emailData.message),
+        html: this.formatEmailHTML(emailData.message, emailData.subject, emailData.html, emailData.attachments),
         attachments: (emailData.attachments && emailData.attachments.length > 0)
           ? emailData.attachments.map(file => ({
             filename: file.originalname,
@@ -152,7 +159,7 @@ class EmailService {
         await emailRecord.save();
       }
 
-      console.log('Attempting to send email to:', emailData.to);
+      console.log('Attempting to send email to:', recipients.join(', '));
       console.log('Attachments count:', emailData.attachments ? emailData.attachments.length : 0);
 
       // Send email
@@ -187,8 +194,6 @@ class EmailService {
         userMessage = 'Gmail authentication failed. Please check your app password.';
       } else if (error.message.includes('ENOTFOUND')) {
         userMessage = 'Network error. Please check your internet connection.';
-      } else if (error.message.includes('Invalid recipient')) {
-        userMessage = 'Invalid email address. Please check the recipient email.';
       } else {
         userMessage = error.message;
       }
@@ -196,13 +201,149 @@ class EmailService {
       return {
         success: false,
         error: userMessage,
+        validationError: error.validationError === true,
         emailId: emailRecord?._id,
         technicalError: error.message
       };
     }
   }
 
-  formatPlainTextToHTML(text, subject = 'No Subject', extraHtml = null, attachments = []) {
+  async validateRecipients(recipients) {
+    for (const recipient of recipients) {
+      let result;
+
+      try {
+        result = await validate({
+          email: recipient,
+          validateTypo: false,
+          validateSMTP: false
+        });
+      } catch (error) {
+        const validationError = new Error(`Unable to validate mailbox: ${recipient}`);
+        validationError.validationError = true;
+        throw validationError;
+      }
+
+      if (!result.valid) {
+        const reason = result.validators?.[result.reason]?.reason;
+        const validationError = new Error(
+          `Invalid or unavailable mailbox: ${recipient}${reason ? ` (${reason})` : ''}`
+        );
+        validationError.validationError = true;
+        throw validationError;
+      }
+    }
+  }
+
+  formatPlainText(text) {
+    return text
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .trim();
+  }
+
+  escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  formatEmailHTML(text, subject = 'No Subject', extraHtml = null, attachments = []) {
+    const safeSubject = this.escapeHtml(subject);
+    const brandName = this.escapeHtml(process.env.MAIL_FROM_NAME || 'Quick Mail');
+    const senderAddress = this.escapeHtml(process.env.GMAIL_USER || 'your mail service');
+    const isHtml = /<(?:p|div|br|strong|em|b|i|u|ul|ol|li|h[1-6])(?:\s|\/?>)/i.test(text);
+    const formattedText = isHtml
+      ? text
+      : text.split(/\r\n|\r|\n/).map(line => this.escapeHtml(line)).join('<br>');
+    const attachmentList = attachments?.length
+      ? `<div class="attachments">
+          <div class="section-label">Attachments <span>${attachments.length}</span></div>
+          ${attachments.map(file => `
+            <div class="attachment">
+              <div class="attachment-icon">&#128206;</div>
+              <div class="attachment-details">
+                <div class="attachment-name">${this.escapeHtml(file.originalname)}</div>
+                <div class="attachment-size">${(Number(file.size || 0) / 1024).toFixed(1)} KB</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>`
+      : '';
+
+    return `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${safeSubject}</title>
+        <style>
+          body { margin: 0; padding: 0; background: #f4f7fb; color: #172033; font-family: Arial, Helvetica, sans-serif; }
+          .wrapper { width: 100%; padding: 32px 12px; background: #f4f7fb; }
+          .container { width: 100%; max-width: 600px; margin: 0 auto; background: #fff; border: 1px solid #e6eaf0; border-radius: 14px; overflow: hidden; }
+          .topbar { padding: 22px 32px; background: #14213d; }
+          .brand { color: #fff; font-size: 18px; font-weight: 700; letter-spacing: .2px; }
+          .brand-mark { display: inline-block; width: 28px; height: 28px; margin-right: 9px; border-radius: 8px; background: #4f7cff; color: #fff; text-align: center; line-height: 28px; font-size: 15px; vertical-align: middle; }
+          .content { padding: 38px 40px 32px; }
+          .eyebrow { margin: 0 0 10px; color: #64748b; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+          h1 { margin: 0 0 26px; color: #14213d; font-size: 26px; line-height: 1.25; font-weight: 700; overflow-wrap: anywhere; }
+          .message { padding: 22px 24px; border: 1px solid #e6eaf0; border-radius: 10px; color: #334155; font-size: 16px; line-height: 1.75; overflow-wrap: anywhere; }
+          .custom-content { margin-top: 22px; padding: 20px; border-left: 3px solid #4f7cff; background: #f7f9fc; color: #334155; overflow-wrap: anywhere; }
+          .attachments { margin-top: 28px; padding-top: 24px; border-top: 1px solid #e6eaf0; }
+          .section-label { margin-bottom: 12px; color: #64748b; font-size: 12px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+          .section-label span { display: inline-block; min-width: 18px; margin-left: 4px; border-radius: 10px; background: #e8efff; color: #315dcc; text-align: center; letter-spacing: 0; }
+          .attachment { display: inline-flex; width: calc(50% - 7px); box-sizing: border-box; align-items: center; margin: 0 10px 10px 0; padding: 10px; border: 1px solid #e6eaf0; border-radius: 8px; vertical-align: top; }
+          .attachment:nth-child(even) { margin-right: 0; }
+          .attachment-icon { margin-right: 9px; font-size: 18px; }
+          .attachment-details { min-width: 0; }
+          .attachment-name { overflow: hidden; color: #334155; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+          .attachment-size { margin-top: 3px; color: #94a3b8; font-size: 11px; }
+          .footer { padding: 20px 32px; border-top: 1px solid #e6eaf0; background: #fafbfc; color: #94a3b8; font-size: 12px; line-height: 1.5; }
+          .footer strong { color: #64748b; }
+          @media only screen and (max-width: 600px) {
+            .wrapper { padding: 0; }
+            .container { border: 0; border-radius: 0; }
+            .topbar { padding: 20px; }
+            .content { padding: 30px 20px 24px; }
+            h1 { font-size: 23px; }
+            .attachment { display: flex; width: 100%; margin-right: 0; }
+            .footer { padding: 18px 20px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="wrapper">
+          <div class="container">
+            <div class="topbar">
+              <div class="brand"><span class="brand-mark">&#9993;</span>${brandName}</div>
+            </div>
+            <div class="content">
+              <p class="eyebrow">A message for you</p>
+              <h1>${safeSubject}</h1>
+              <div class="message">${formattedText}</div>
+              ${extraHtml ? `<div class="custom-content">${extraHtml}</div>` : ''}
+              ${attachmentList}
+            </div>
+            <div class="footer">
+              Sent with <strong>${brandName}</strong> from ${senderAddress}. Please reply to this email to contact the sender.
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  formatLegacyEmailHTML(text, subject = 'No Subject', extraHtml = null, attachments = []) {
     // Check if text looks like HTML (contains tags)
     const isHtml = /<[a-z][\s\S]*>/i.test(text);
 
@@ -403,8 +544,7 @@ class EmailService {
           <div class="email-wrapper">
               <div class="email-container">
                   <div class="email-header">
-                      <div class="brand-logo">✨ Hello Sir / Madam</div>
-                      <div class="header-subtitle">Subject: ${subject}</div>
+                      <div class="brand-logo">${subject}</div>
                   </div>
                   
                   <div class="email-body">
@@ -422,12 +562,7 @@ class EmailService {
                   </div>
                   
                   <div class="email-footer">
-                      <p class="footer-text">Sent By Janak Kr Shrestha</p>
-                      <p class="footer-text">
-                          <a href="https://www.linkedin.com/in/janakkss/" class="footer-link">Linkedin</a> |
-                          <a href="https://www.janakkumarshrestha0.com.np/" class="footer-link">Portfolio</a>
-                      </p>
-                      <p class="footer-text">Thank You for your time</p>
+                      <p class="footer-text">Sent from ${process.env.GMAIL_USER || 'MERN SMTP'}</p>
                   </div>
               </div>
           </div>
@@ -618,116 +753,6 @@ Best regards,
     return await this.sendEmail(testData);
   }
 
-  async validateEmailDeeply(email) {
-    // Check if deep validation is disabled via environment variable
-    if (process.env.SKIP_DEEP_VALIDATION === 'true') {
-      console.log('Skipping deep email validation (SKIP_DEEP_VALIDATION is set)');
-      return true;
-    }
-
-    try {
-      console.log(`Starting deep validation for: ${email}`);
-      const { valid, reason, validators } = await emailValidator.validate({
-        email: email,
-        sender: process.env.GMAIL_USER || 'janak123g@gmail.com', // Use actual sender to avoid greylisting/blocking
-        validateRegex: true,
-        validateMx: true,
-        validateTypo: true,
-        validateDisposable: true,
-        validateSMTP: true,
-      });
-
-      console.log('Validation result:', { valid, reason, validators });
-
-      if (!valid) {
-        // Special handling for SMTP errors
-        if (reason === 'smtp') {
-          const smtpReason = validators.smtp?.reason;
-          console.log(`SMTP Validation Reason: ${smtpReason}`);
-
-          // Expanded list of Hard Failures (550, 551, 552, 553, 554)
-          // And specific messages that indicate the user doesn't exist
-          const hardFailurePatterns = [
-            '550', '551', '552', '553', '554',
-            'does not exist',
-            'mailbox unavailable',
-            'mailbox not found',
-            'User unknown',
-            'unknown user',
-            'recipient rejected',
-            'invalid address',
-            'Address not found',
-            'Access denied',
-            'Relay access denied',
-            'No such user',
-            'account is disabled',
-            'account has been disabled'
-          ];
-
-          const isHardFailure = hardFailurePatterns.some(pattern =>
-            smtpReason && smtpReason.toString().toLowerCase().includes(pattern.toLowerCase())
-          );
-
-          if (isHardFailure) {
-            throw new Error(`Email address does not exist or is blocked: ${smtpReason}`);
-          }
-
-          // STRICT MODE: If enabled, treat ANY SMTP failure as invalid
-          // For Gmail/major providers, we should be stricter even without the env var
-          const isMajorProvider = /@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|icloud\.com)$/i.test(email);
-
-          if (process.env.STRICT_EMAIL_VALIDATION === 'true' || isMajorProvider) {
-            // If it's a major provider and we got an SMTP error that wasn't a hard failure (e.g. timeout),
-            // it's risky. But if it's a 250 OK, valid would be true.
-            // If valid is false and reason is smtp, it implies it FAILED.
-            // So we should probably fail here for major providers too.
-            throw new Error(`Email validation failed: ${smtpReason || 'SMTP connection failed'}`);
-          }
-
-          // For other SMTP errors (timeouts, connection refused) in non-strict mode, we FAIL OPEN
-          console.warn(`SMTP validation failed but failing open (soft failure). Reason: "${smtpReason}".`);
-          return true;
-        }
-
-        let errorMessage = 'Invalid email address';
-
-        if (validators[reason] && validators[reason].reason) {
-          errorMessage = `Email validation failed: ${validators[reason].reason} `;
-        } else {
-          switch (reason) {
-            case 'regex': errorMessage = 'Invalid email format'; break;
-            case 'typo': errorMessage = 'Did you mean ' + validators.typo?.reason + '?'; break;
-            case 'disposable': errorMessage = 'Disposable email addresses are not allowed'; break;
-            case 'mx': errorMessage = 'Domain does not accept email (MX record missing)'; break;
-            default: errorMessage = `Invalid email: ${reason} `;
-          }
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      return true;
-    } catch (error) {
-      // If it's our own error, rethrow it
-      if (error.message.startsWith('Email validation failed') ||
-        error.message.startsWith('Invalid email') ||
-        error.message.startsWith('Disposable') ||
-        error.message.startsWith('Domain') ||
-        error.message.startsWith('Email address does not exist') ||
-        error.message.startsWith('Did you mean')) {
-        throw error;
-      }
-
-      // Log unexpected validation errors but allow sending (fail open) unless in strict mode
-      console.warn('Deep email validation warning:', error.message);
-
-      if (process.env.STRICT_EMAIL_VALIDATION === 'true') {
-        throw new Error(`Email validation failed (Strict Mode): ${error.message}`);
-      }
-
-      return true;
-    }
-  }
 }
 
 // Create and export singleton instance

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { Bold, Italic, Underline, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, RemoveFormatting } from 'lucide-react';
 
 const SimpleEditor = ({ value, onChange, placeholder }) => {
@@ -15,7 +15,7 @@ const SimpleEditor = ({ value, onChange, placeholder }) => {
         }
     }, [value]);
 
-    const updateActiveFormats = () => {
+    const updateActiveFormats = useCallback(() => {
         const active = new Set();
         if (document.queryCommandState('bold')) active.add('bold');
         if (document.queryCommandState('italic')) active.add('italic');
@@ -26,7 +26,7 @@ const SimpleEditor = ({ value, onChange, placeholder }) => {
         if (document.queryCommandState('justifyCenter')) active.add('justifyCenter');
         if (document.queryCommandState('justifyRight')) active.add('justifyRight');
         setActiveFormats(active);
-    };
+    }, []);
 
     const handleInput = () => {
         if (editorRef.current) {
@@ -41,14 +41,14 @@ const SimpleEditor = ({ value, onChange, placeholder }) => {
         }
     };
 
-    const handleSelectionChange = () => {
+    const handleSelectionChange = useCallback(() => {
         updateActiveFormats();
-    };
+    }, [updateActiveFormats]);
 
     useEffect(() => {
         document.addEventListener('selectionchange', handleSelectionChange);
         return () => document.removeEventListener('selectionchange', handleSelectionChange);
-    }, []);
+    }, [handleSelectionChange]);
 
     const execCommand = (command, value = null) => {
         document.execCommand(command, false, value);
@@ -83,7 +83,7 @@ const SimpleEditor = ({ value, onChange, placeholder }) => {
                     <React.Fragment key={groupIndex}>
                         {groupIndex > 0 && <div className="toolbar-separator" />}
                         <div className="toolbar-group">
-                            {group.map(({ command, icon: Icon, label }) => (
+                            {group.map(({ command, icon: ToolIcon, label }) => (
                                 <button
                                     key={command}
                                     type="button"
@@ -92,7 +92,7 @@ const SimpleEditor = ({ value, onChange, placeholder }) => {
                                     title={label}
                                     aria-label={label}
                                 >
-                                    <Icon size={16} />
+                                    {React.createElement(ToolIcon, { size: 16 })}
                                 </button>
                             ))}
                         </div>

@@ -7,6 +7,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 ---
 
 ## Table of Contents
+- [Project Documentation](#-project-documentation)
 - [Use Cases](#-use-cases)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
@@ -17,6 +18,14 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - [Project Structure](#-project-structure)
 - [API Reference](#-api-reference)
 - [Contributing](#-contributing)
+
+---
+
+## Project Documentation
+
+See [PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md) for the authoritative
+setup, environment, Docker, Nginx, production operations, API, troubleshooting,
+and deployment checklist.
 
 ---
 
@@ -62,7 +71,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - **Accessibility**: Keyboard navigation and screen reader support
 
 ### Security \  Reliability
-- **Email Validation**: Deep validation with MX, typo, and disposable checks
+- **Email Validation**: Deep syntax, domain, and disposable-address validation before delivery; SMTP delivery responses reject unavailable mailboxes
 - **Rate Limiting**: Prevent abuse with configurable request limits (10 emails/15 minutes)
 - **Secure Authentication**: Gmail OAuth2-ready SMTP integration
 - **Ghost Mode Privacy**: Optional local-only storage for sensitive communications
@@ -86,7 +95,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 - **Runtime**: Node.js with Express.js
 - **Database**: MongoDB (Atlas or Local)
 - **Email**: Nodemailer with Gmail SMTP
-- **Validation**: Deep Email Validator
+- **Validation**: Server-side deep recipient checks with `deep-email-validator` plus SMTP mailbox rejection
 - **Security**: Helmet, CORS, Express Rate Limit
 - **File Upload**: Multer
 
@@ -104,7 +113,7 @@ A modern, full-stack email delivery application built with the MERN stack (Mongo
 
 Before running the application, ensure you have:
 
-- **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
+- **Node.js** (v20 or higher) - [Download](https://nodejs.org/)
 - **MongoDB** (Local or Atlas account) - [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 - **Gmail Account** with App Password enabled
 - **Docker \  Docker Compose** (Optional, for containerized deployment)
@@ -132,9 +141,14 @@ cd MERN-gmail-smpt
 
 ### Backend Environment Variables
 
-Create a `.env` file in the `backend` directory:
+Create the backend environment file from the included template:
 
-**Path**: `backend/.env`
+```bash
+cp backend/.env.example backend/.env
+chmod 600 backend/.env
+```
+
+**Path**: `backend/.env` (ignored by Git)
 
 ```env
 # ======================
@@ -180,8 +194,8 @@ GMAIL_APP_PASSWORD=your-app-password
 
 **Using Docker** (Recommended for local development):
 ```bash
-# MongoDB will start automatically with docker-compose
-docker compose up -d
+# Set DB_SOURCE=local in both .env and backend/.env
+sudo docker compose --profile local-db up -d --build
 ```
 
 **Using System MongoDB**:
@@ -234,23 +248,18 @@ mongodb+srv://myuser:MySecurePassword123@cluster0.ab1cd.mongodb.net/quickmail?re
 
 ### Docker Method (Recommended)
 
-**Easiest way to run both frontend and backend:**
+**Atlas deployment (recommended):**
 
 ```bash
-# Start all services
-docker compose up -d
-
-# Check container status
-docker compose ps
-
-# View logs
-docker compose logs -f
+cp .env.example .env
+# Set DB_SOURCE=cloud and MONGODB_URI_CLOUD in backend/.env
+sudo docker compose up -d --build backend frontend
 ```
 
 **Docker Features:**
-- ✅ **MongoDB Included**: Local MongoDB (port 27017) for development
+- ✅ **Database Choice**: MongoDB Atlas or optional local MongoDB profile
 - ✅ **Health Checks**: Automatic monitoring for all services
-- ✅ **Auto-Restart**: Containers restart on failure
+- ✅ **Explicit Lifecycle**: Services start/stop through Docker Compose
 - ✅ **Optimized Images**: Multi-stage builds for small footprint
 - ✅ **Volume Persistence**: Email attachments and database data preserved
 
@@ -262,8 +271,25 @@ docker compose logs -f
 
 **Stop Services:**
 ```bash
-docker compose down
+sudo docker compose down
 ```
+
+**Local MongoDB deployment:**
+
+```bash
+# Set DB_SOURCE=local in both .env and backend/.env.
+sudo docker compose --profile local-db up -d --build
+```
+
+Check the deployment:
+
+```bash
+sudo docker compose ps
+curl http://localhost:5000/api/email/health
+```
+
+Do not use `docker compose down -v` unless you intentionally want to delete
+the local MongoDB volume.
 
 ---
 
@@ -449,11 +475,12 @@ git clone https://github.com/janak0ff/MERN-gmail-smpt.git
 cd MERN-gmail-smpt
 
 # Configure environment
+cp .env.example .env
 cp backend/.env.example backend/.env
 nano backend/.env
 
 # Deploy with Docker
-docker compose up -d
+sudo docker compose up -d --build backend frontend
 
 # OR deploy with PM2
 cd backend && npm install

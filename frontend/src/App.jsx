@@ -46,6 +46,8 @@ function App() {
     if (activeTab === 'stats') {
       fetchStats();
     }
+    // fetchEmailHistory is defined in this component and uses the current filters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, filters]);
 
   const handleChange = (e) => {
@@ -239,7 +241,7 @@ function App() {
       } else {
         toast.error('❌ SMTP connection failed');
       }
-    } catch (error) {
+    } catch {
       toast.error('❌ SMTP health check failed');
     }
   };

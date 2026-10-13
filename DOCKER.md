@@ -27,50 +27,54 @@ docker compose version
 
 ### 1. Environment Setup
 
-Copy the example environment file and configure your settings:
+Create the Compose environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and fill in your actual values:
+Configure the backend environment file:
+
+```bash
+cp backend/.env.example backend/.env
+nano backend/.env
+```
+
+Edit `backend/.env` and fill in your actual values:
 
 ```env
-# Choose database: local or cloud
-DB_SOURCE=local
+# Use MongoDB Atlas for production
+DB_SOURCE=cloud
 
 # If using cloud, add your MongoDB Atlas connection string
 MONGODB_URI_CLOUD=mongodb+srv://username:password@cluster.mongodb.net/database
 
-# Add your Gmail credentials
 GMAIL_USER=your-email@gmail.com
 GMAIL_APP_PASSWORD=your-app-password
+NODE_ENV=production
+CLIENT_URL=http://localhost:3000
 ```
 
 ### 2. Build and Run
 
-**Option A: Using Local MongoDB (Docker)**
+**Option A: Using Cloud MongoDB Atlas (recommended)**
 
 ```bash
-# Build all services
-docker compose build
-
-# Start all services (including MongoDB)
-docker compose up -d
+# Build and start the Atlas-backed production services.
+# Do not use --profile local-db for Atlas.
+sudo docker compose up -d --build backend frontend
 
 # View logs
-docker compose logs -f
+sudo docker compose logs -f
 ```
 
-**Option B: Using Cloud MongoDB Atlas**
+**Option B: Using Local MongoDB (Docker)**
 
 ```bash
-# Edit .env and set:
-# DB_SOURCE=cloud
-# MONGODB_URI_CLOUD=your-atlas-connection-string
+# Set DB_SOURCE=local in both .env and backend/.env first.
 
-# Start only backend and frontend (skip MongoDB)
-docker compose up -d backend frontend
+# Start the optional MongoDB profile and application
+sudo docker compose --profile local-db up -d --build
 ```
 
 ### 3. Access the Application
@@ -110,6 +114,70 @@ docker compose down -v
 
 # Restart a specific service
 docker compose restart backend
+```
+
+The Compose services intentionally do not use an automatic restart policy.
+Start the application explicitly when needed; it will not return after a
+system or Docker daemon reboot by itself.
+
+### Running Docker behind host Nginx
+
+Docker exposes the frontend on port 3000 and the backend on port 5000. To
+serve the application through host Nginx on port 80, create a separate
+configuration file:
+
+```bash
+sudo mkdir -p /etc/nginx/conf.d
+sudo tee /etc/nginx/conf.d/mern-gmail-smpt.conf > /dev/null <<'NGINX'
+server {
+    listen 80;
+    listen [::]:80;
+    server_name localhost 127.0.0.1;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:5000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+NGINX
+```
+
+Ensure the main Nginx `http {}` block includes the app-specific directory:
+
+```bash
+sudo grep -qE '^[[:space:]]*include[[:space:]]+conf\.d/\*\.conf;' /etc/nginx/nginx.conf || \
+  sudo sed -i '/^[[:space:]]*http[[:space:]]*{/a\    include conf.d/*.conf;' /etc/nginx/nginx.conf
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+The public local URL is then `http://localhost/`. Nginx remains running when
+the application is stopped, but the URL will return `404` or `502` until the
+Docker services are started again.
+
+```bash
+# Start the Atlas-backed app
+sudo docker compose up -d --build backend frontend
+
+# Stop only this MERN application; Nginx stays running
+sudo docker compose down
+
+# Disable this app's Nginx route without stopping Nginx
+sudo mv /etc/nginx/conf.d/mern-gmail-smpt.conf \
+  /etc/nginx/conf.d/mern-gmail-smpt.conf.disabled
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ### Viewing Logs
@@ -167,8 +235,9 @@ docker compose exec mongodb mongosh mern_smtp
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `DB_SOURCE` | Database source: `local` or `cloud` | `local` |
+| `DB_SOURCE` | Database source: `local` or `cloud` | `cloud` |
 | `MONGODB_URI_CLOUD` | MongoDB Atlas connection string | - |
+| `MONGODB_URI_LOCAL` | Local MongoDB connection string | `mongodb://mongodb:27017/mern_smtp` in Compose |
 | `GMAIL_USER` | Gmail address for SMTP | - |
 | `GMAIL_APP_PASSWORD` | Gmail app-specific password | - |
 | `NODE_ENV` | Environment mode | `production` |
@@ -179,19 +248,19 @@ docker compose exec mongodb mongosh mern_smtp
 
 ### To Local MongoDB:
 
-1. Edit `.env`:
+1. Edit both `.env` and `backend/.env`:
    ```env
    DB_SOURCE=local
    ```
 
 2. Restart services:
    ```bash
-   docker compose up -d
+   sudo docker compose --profile local-db up -d --build
    ```
 
 ### To Cloud MongoDB Atlas:
 
-1. Edit `.env`:
+1. Edit both `.env` and `backend/.env`:
    ```env
    DB_SOURCE=cloud
    MONGODB_URI_CLOUD=mongodb+srv://...
@@ -199,12 +268,12 @@ docker compose exec mongodb mongosh mern_smtp
 
 2. Restart backend only:
    ```bash
-   docker compose restart backend
+   sudo docker compose restart backend
    ```
 
 3. (Optional) Stop local MongoDB to save resources:
    ```bash
-   docker compose stop mongodb
+   sudo docker compose --profile local-db stop mongodb
    ```
 
 ## Production Deployment
