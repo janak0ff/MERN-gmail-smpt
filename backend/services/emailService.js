@@ -102,9 +102,9 @@ class EmailService {
       }
 
       const recipients = Array.isArray(emailData.to) ? emailData.to : [emailData.to];
-      await this.validateRecipients(recipients);
 
-      // Create email record in database with pending status (SKIP if ghost mode)
+      // Create the record before validation so rejected attempts are visible in
+      // history and analytics as failed (SKIP if ghost mode).
       if (!emailData.ghostMode) {
         emailRecord = new Email({
           from: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com',
@@ -120,6 +120,14 @@ class EmailService {
       } else {
         console.log('👻 Ghost Mode enabled: Skipping database storage');
       }
+
+      if (emailData.subject.length > 200) {
+        const validationError = new Error('Subject must be less than 200 characters');
+        validationError.validationError = true;
+        throw validationError;
+      }
+
+      await this.validateRecipients(recipients);
 
       // Prepare email options
       const senderAddress = process.env.GMAIL_USER || 'noreply@mern-smtp-app.com';

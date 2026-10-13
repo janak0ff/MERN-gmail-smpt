@@ -74,16 +74,6 @@ router.post('/send', sendEmailLimiter, upload.array('attachments'), async (req, 
       });
     }
 
-    // Subject length validation
-    if (subject.length > 200) {
-      return res.status(400).json({
-        success: false,
-        message: 'Subject must be less than 200 characters'
-      });
-    }
-
-
-
     // Send email
     const emailResult = await emailService.sendEmail({
       to,
