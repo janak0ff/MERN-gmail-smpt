@@ -207,7 +207,8 @@ class EmailService {
       try {
         result = await validate({
           email: recipient,
-          sender: process.env.GMAIL_USER || 'noreply@mern-smtp-app.com'
+          validateTypo: false,
+          validateSMTP: false
         });
       } catch (error) {
         const validationError = new Error(`Unable to validate mailbox: ${recipient}`);

@@ -71,7 +71,7 @@ and deployment checklist.
 - **Accessibility**: Keyboard navigation and screen reader support
 
 ### Security \  Reliability
-- **Email Validation**: Deep syntax, domain, disposable-address, and mailbox validation before delivery
+- **Email Validation**: Deep syntax, domain, and disposable-address validation before delivery; SMTP delivery responses reject unavailable mailboxes
 - **Rate Limiting**: Prevent abuse with configurable request limits (10 emails/15 minutes)
 - **Secure Authentication**: Gmail OAuth2-ready SMTP integration
 - **Ghost Mode Privacy**: Optional local-only storage for sensitive communications
@@ -95,7 +95,7 @@ and deployment checklist.
 - **Runtime**: Node.js with Express.js
 - **Database**: MongoDB (Atlas or Local)
 - **Email**: Nodemailer with Gmail SMTP
-- **Validation**: Server-side deep recipient and mailbox checks with `deep-email-validator`
+- **Validation**: Server-side deep recipient checks with `deep-email-validator` plus SMTP mailbox rejection
 - **Security**: Helmet, CORS, Express Rate Limit
 - **File Upload**: Multer
 
